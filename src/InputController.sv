@@ -28,10 +28,10 @@ module InputController(
     logic [3:0] control_speed;
     logic       control_interpol;
 
-    assign o_input_event[15:12] =  control_code    ;
-    assign o_input_event[11:10] =  control_mode    ;
-    assign o_input_event[9:6]   =  control_speed   ;
-    assign o_input_event[5]     =  control_interpol;
+    assign o_input_event[15:12] = control_code    ;
+    assign o_input_event[11:10] = control_mode    ;
+    assign o_input_event[9:6]   = control_speed   ;
+    assign o_input_event[5]     = control_interpol;
     assign o_input_event[4:0]   = 5'd0;
 
     always_ff @(posedge i_clk or posedge i_rst) begin
@@ -39,12 +39,11 @@ module InputController(
             o_input_event <= 16'd0;
         end else begin
             case(mode)
-                4'b0000: control_code <= REC_NONE;
                 4'b1000: control_code <= REC_PLAY;
                 4'b0100: control_code <= REC_PAUSE;
                 4'b0010: control_code <= REC_STOP;
-                4'b0001: control_code <= REC_RECOED;
-                default: control_code <= REC_NONE;
+                4'b0001: control_code <= REC_RECORD;
+                default: control_code <= control_code;
             endcase
             case (i_sw_speed[1:0])
                 2'b01: control_mode <= REC_SLOW;
