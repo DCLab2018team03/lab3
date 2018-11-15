@@ -1,0 +1,9 @@
+	component AudioConfig is
+		port (
+			audio_and_video_config_0_external_interface_SDAT : inout std_logic := 'X'; -- SDAT
+			audio_and_video_config_0_external_interface_SCLK : out   std_logic;        -- SCLK
+			clk_clk                                          : in    std_logic := 'X'; -- clk
+			reset_reset_n                                    : in    std_logic := 'X'  -- reset_n
+		);
+	end component AudioConfig;
+

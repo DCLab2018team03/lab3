@@ -4,80 +4,81 @@ module Recorder (
     // Input
     input   [15:0]  i_input_event,
     // Output
-    output  [15:0]  o_output_event,
-	 output	[15:0]  o_event_hold,
+	output	[15:0]  o_event_hold,
     output  [63:0]  o_time,
-    // Audio CODEC
-    input           AUD_BCLK,
-    input           AUD_ADCLRCK,
-    input           AUD_ADCDAT,
-    input           AUD_DACLRCK,
-    output          AUD_DACDAT,
-    // Mem Controller
-    output          o_mem_read,
-    output          o_mem_write,
-    output  [31:0]  o_mem_addr,
-    inout   [15:0]  io_mem_data,
-    input           i_mem_done
-);
-
-    wire w_aud_init_fin;
-    assign w_aud_init_fin = 1;
-    wire w_audio_core_stop_signal;
     
+    // avalon_audio_slave
+    // avalon_left_channel_source
+    output logic from_adc_left_channel_ready,
+    input  [15:0] from_adc_left_channel_data,
+    input  from_adc_left_channel_valid,
+    // avalon_right_channel_source
+    output logic from_adc_right_channel_ready,
+    input  [15:0] from_adc_right_channel_data,
+    input  from_adc_right_channel_valid,
+    // avalon_left_channel_sink
+    output logic [15:0] to_dac_left_channel_data,
+    output logic to_dac_left_channel_valid,
+    input  to_dac_left_channel_ready,
+    // avalon_left_channel_sink
+    output logic [15:0] to_dac_right_channel_data,
+    output logic to_dac_right_channel_valid,
+    input  to_dac_right_channel_ready,
+    // avalon_sram_slave
+    output logic [19:0] address,
+    output logic [1:0]  byteenable,
+    output logic read,
+    output logic write,
+    output logic [15:0] writedata,
+    input  [15:0] readdata,
+    input  readdatavalid
+);
+    wire w_audio_core_stop_signal;
+    assign w_audio_core_stop_signal = 0;
+    assign o_time = 0;
     RecorderCore recorderCore(
         .i_clk(i_clk),
         .i_rst(i_rst),
         .i_input_event(i_input_event),
         .o_event(o_output_event),
-		  .o_event_hold(o_event_hold),
-        .o_aud_init_start(w_aud_init_start),
-        .i_aud_init_fin(w_aud_init_fin),
+		.o_event_hold(o_event_hold),
         .i_stop(w_audio_core_stop_signal)
     );
     
-    wire            w_buf_reload;
-    wire            w_buf_read;
-    wire            w_buf_write;
-    wire    [3:0]   w_buf_increment;
-    wire    [15:0]  w_buf_data;
-    wire            w_buf_done;
-    wire    [31:0]  w_buf_reload_addr;
+
     AudioCore audioCore(
         .i_clk(i_clk),
         .i_rst(i_rst),
-        .i_event(o_output_event),
-        .o_time(o_time),
-        .AUD_BCLK(AUD_BCLK),
-        .AUD_ADCLRCK(AUD_ADCLRCK),
-        .AUD_ADCDAT(AUD_ADCDAT),
-        .AUD_DACLRCK(AUD_DACLRCK),
-        .AUD_DACDAT(AUD_DACDAT),
-        .o_buf_reload(w_buf_reload),
-        .o_buf_read(w_buf_read),
-        .o_buf_write(w_buf_write),
-        .o_buf_increment(w_buf_increment),
-        .io_buf_data(w_buf_data),
-        .i_buf_done(w_buf_done),
-        .o_buf_reload_addr(w_buf_reload_addr),
-        .o_stop_signal(w_audio_core_stop_signal)
-    );
+        // Recorder Core
+        .i_event(o_output_event),                // 4code,2speed,4param,1inter,5reserved
+        .o_time(0),                 // 12current,12total
+        .o_stop_signal(w_audio_core_stop_signal),
+        // avalon_audio_slave
+        // avalon_left_channel_source
+        .from_adc_left_channel_ready(from_adc_left_channel_ready),
+        .from_adc_left_channel_data(from_adc_left_channel_data),
+        .from_adc_left_channel_valid(from_adc_left_channel_valid),
+        // avalon_right_channel_source
+        .from_adc_right_channel_ready(from_adc_right_channel_ready),
+        .from_adc_right_channel_data(from_adc_right_channel_data),
+        .from_adc_right_channel_valid(from_adc_right_channel_valid),
+        // avalon_left_channel_sink
+        .to_dac_left_channel_data(to_dac_left_channel_data),
+        .to_dac_left_channel_valid(to_dac_left_channel_valid),
+        .to_dac_left_channel_ready(to_dac_left_channel_ready),
+        // avalon_left_channel_sink
+        .to_dac_right_channel_data(to_dac_right_channel_data),
+        .to_dac_right_channel_valid(to_dac_right_channel_valid),
+        .to_dac_right_channel_ready(to_dac_right_channel_ready),
+        // avalon_sram_slave
+        .address(address),
+        .byteenable(byteenable),
+        .read(read),
+        .write(write),
+        .writedata(writedata),
+        .readdata(readdata),
+        .readdatavalid(readdatavalid)   
+);
     
-    AudioBuffer audioBuffer(
-        .i_clk(i_clk),
-        .i_rst(i_rst),
-        .i_reload(w_buf_reload),
-        .i_reload_addr(w_buf_reload_addr),
-        .i_read(w_buf_read),
-        .i_write(w_buf_write),
-        .i_increment(w_buf_increment),
-        .io_data(w_buf_data),
-        .o_done(w_buf_done),
-        .o_mem_read(o_mem_read),
-        .o_mem_write(o_mem_write),
-        .o_mem_addr(o_mem_addr),
-        .io_mem_data(io_mem_data),
-        .i_mem_done(i_mem_done)
-    );
 
 endmodule

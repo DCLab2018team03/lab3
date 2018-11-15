@@ -196,22 +196,9 @@ module DE2_115 (
     // Main program
     ///////////////////////////////////////
 
-    // Audio CODEC
-    AudioPLL audioPLL(
-        .clk_clk(CLOCK_50),
-        .reset_reset_n(~rst_main),
-        .audio_clk_clk(AUD_XCK)
-    );
     wire rst_audio;
     assign rst_audio = SW[16];
-    AudioConfig audioConfig(
-        .audio_and_video_config_0_external_interface_SDAT(I2C_SDAT),
-        .audio_and_video_config_0_external_interface_SCLK(I2C_SCLK),
-        .clk_clk(CLOCK_50),
-        .reset_reset_n(~rst_audio)
-    );
-    
-    // Main Module
+     // Main Module
     wire rst_main;
     assign rst_main = SW[17];
     wire            w_mem_read;
@@ -219,98 +206,121 @@ module DE2_115 (
     wire    [31:0]  w_mem_addr;
     wire    [15:0]  w_mem_data;
     wire            w_mem_done;
-	 wire    [63:0]  w_time;
-    
+	// wire between I2S and AudioCore
+	wire            w_adc_left_ready;
+	wire    [15:0]  w_adc_left_data;
+	wire            w_adc_left_valid;
+	wire            w_dac_left_ready;
+	wire    [15:0]  w_dac_left_data;
+	wire            w_dac_left_valid;
+	wire            w_adc_right_ready;
+	wire    [15:0]  w_adc_right_data;
+	wire            w_adc_right_valid;
+	wire            w_dac_right_ready;
+	wire    [15:0]  w_dac_right_data;
+	wire            w_dac_right_valid;
+    // wire between AudioCore and SRAM
+    wire    [19:0]  w_address;
+    wire            w_byteenable;
+    wire            w_read;
+    wire            w_write;
+    wire    [15:0]  w_writedata;
+    wire    [15:0]  w_readdata;
+    wire            w_readdatavalid;
+
     wire    [15:0]  w_input_event;
     wire    [15:0]  w_event_hold;
-    Recorder recorder(
-        .i_clk(CLOCK_50),
-        .i_rst(rst_main),
-        .i_input_event(w_input_event),
-        .o_output_event(),
-		  
-        .o_event_hold(w_event_hold),
-		.o_time(w_time),
-		  
-        .AUD_BCLK(AUD_BCLK),
-        .AUD_ADCLRCK(AUD_ADCLRCK),
-        .AUD_ADCDAT(AUD_ADCDAT),
-        .AUD_DACLRCK(AUD_DACLRCK),
-        .AUD_DACDAT(AUD_DACDAT),
-        .o_mem_read(w_mem_read),
-        .o_mem_write(w_mem_write),
-        .o_mem_addr(w_mem_addr),
-        .io_mem_data(w_mem_data),
-        .i_mem_done(w_mem_done),
-        
-    );
-    
+	wire    [63:0]  w_time;
 
-    // Memory Controller
-    wire [24:0] w_avm_address;
-    wire [3:0]  w_avm_byteenable;
-    wire        w_avm_chipselect;
-    wire [31:0] w_avm_writedata;
-    wire        w_avm_read;
-    wire        w_avm_write;
-    wire [31:0] w_avm_readdata;
-    wire        w_avm_readdatavalid;
-    wire        w_avm_waitrequest;
-    sdram_avm_controller sdram_avm_controller_inst(
-        .clk(CLOCK_50),
-        .rst(rst_main),
-        .i_read(w_mem_read),
-        .i_write(w_mem_write),
-        .i_addr(w_mem_addr),
-        .io_data(w_mem_data),
-        .o_done(w_mem_done),
-        .o_avm_address(w_avm_address),
-        .o_avm_byteenable(w_avm_byteenable),
-        .o_avm_chipselect(w_avm_chipselect),
-        .o_avm_writedata(w_avm_writedata),
-        .o_avm_read(w_avm_read),
-        .o_avm_write(w_avm_write),
-        .i_avm_readdata(w_avm_readdata),
-        .i_avm_readdatavalid(w_avm_readdatavalid),
-        .i_avm_waitrequest(w_avm_waitrequest)
+    /*
+	// Audio Config
+	AudioConfig audioConfig(
+	    .audio_and_video_config_0_external_interface_SDAT(I2C_SDAT), // audio_and_video_config_0_external_interface.SDAT
+		.audio_and_video_config_0_external_interface_SCLK(I2C_SCLK), //                                            .SCLK
+		.clk_clk(CLOCK_50),                                          //                                          clk.clk
+		.reset_reset_n(~rst_audio)                                   //                                    reset.reset_n
+	);
+	// AudioI2S
+	AudioI2S audioI2S(
+		.audio_0_external_interface_ADCDAT(AUD_ADCDAT),   // audio_0_external_interface.ADCDAT
+		.audio_0_external_interface_ADCLRCK(AUD_ADCLRCK), //                           .ADCLRCK
+		.audio_0_external_interface_BCLK(AUD_BCLK),       //                           .BCLK
+		.audio_0_external_interface_DACDAT(AUD_DACDAT),   //                           .DACDAT
+		.audio_0_external_interface_DACLRCK(AUD_DACLRCK), //                           .DACLRCK
+		.clk_clk(CLOCK_50),                               //                        clk.clk
+		.reset_reset_n(~rst_audio),                        //                      reset.reset_n
+		.from_adc_left_channel_ready  (w_adc_left_ready),                                   //  avalon_left_channel_source.ready
+		.from_adc_left_channel_data   (w_adc_left_data),                                   //                            .data
+		.from_adc_left_channel_valid  (w_adc_left_valid),                                   //                            .valid
+		.from_adc_right_channel_ready (w_adc_right_ready),                                   // avalon_right_channel_source.ready
+		.from_adc_right_channel_data  (w_adc_right_data),                                   //                            .data
+		.from_adc_right_channel_valid (w_adc_right_valid),                                   //                            .valid
+		.to_dac_left_channel_data     (w_dac_left_data),                                   //    avalon_left_channel_sink.data
+		.to_dac_left_channel_valid    (w_dac_left_valid),                                   //                            .valid
+		.to_dac_left_channel_ready    (w_dac_left_ready),                                   //                            .ready
+		.to_dac_right_channel_data    (w_dac_right_data),                                   //   avalon_right_channel_sink.data
+		.to_dac_right_channel_valid   (w_dac_right_valid),                                   //                            .valid
+		.to_dac_right_channel_ready   (w_dac_right_ready)                                 //                            .ready
+
+	);
+	// SRAM
+	SRAM sram(
+	 	.clk_clk(CLOCK_50),                                           //                   clk.clk
+		.reset_reset_n(~rst_main),                                    //                   reset.reset_n
+		.sram_0_external_interface_DQ(SRAM_DQ),                       //                   sram_0_external_interface.DQ
+		.sram_0_external_interface_ADDR(SRAM_ADDR),                   //                                            .ADDR
+		.sram_0_external_interface_LB_N(SRAM_LB_N),                   //                                            .LB_N
+		.sram_0_external_interface_UB_N(SRAM_UB_N),                   //                                            .UB_N
+		.sram_0_external_interface_CE_N(SRAM_CE_N),                   //                                            .CE_N
+		.sram_0_external_interface_OE_N(SRAM_OE_N),                   //                                            .OE_N
+		.sram_0_external_interface_WE_N(SRAM_WE_N),
+        .address      (w_address),
+        .byteenable   (w_byteenable),
+        .read         (w_read),
+        .write        (w_write),
+        .writedata    (w_writedata),
+        .readdata     (w_readdata),
+        .readdatavalid(w_readdatavalid)          	 
+	);*/
+    Total total(
+        .audio_0_external_interface_ADCDAT(AUD_ADCDAT),   // audio_0_external_interface.ADCDAT
+		.audio_0_external_interface_ADCLRCK(AUD_ADCLRCK), //                           .ADCLRCK
+		.audio_0_external_interface_BCLK(AUD_BCLK),       //                           .BCLK
+		.audio_0_external_interface_DACDAT(AUD_DACDAT),   //                           .DACDAT
+		.audio_0_external_interface_DACLRCK(AUD_DACLRCK), //                           .DACLRCK
+        .audio_and_video_config_0_external_interface_SDAT(I2C_SDAT), // audio_and_video_config_0_external_interface.SDAT
+		.audio_and_video_config_0_external_interface_SCLK(I2C_SCLK), //                                            .SCLK
+		.clk_clk(CLOCK_50),                                          //                                          clk.clk
+		.reset_reset_n(~rst_main),                                   //                                    reset.reset_n
+        .sram_0_external_interface_DQ(SRAM_DQ),                       //                   sram_0_external_interface.DQ
+		.sram_0_external_interface_ADDR(SRAM_ADDR),                   //                                            .ADDR
+		.sram_0_external_interface_LB_N(SRAM_LB_N),                   //                                            .LB_N
+		.sram_0_external_interface_UB_N(SRAM_UB_N),                   //                                            .UB_N
+		.sram_0_external_interface_CE_N(SRAM_CE_N),                   //                                            .CE_N
+		.sram_0_external_interface_OE_N(SRAM_OE_N),                   //                                            .OE_N
+		.sram_0_external_interface_WE_N(SRAM_WE_N),
+        .from_adc_left_channel_ready  (w_adc_left_ready),                                   //  avalon_left_channel_source.ready
+		.from_adc_left_channel_data   (w_adc_left_data),                                   //                            .data
+		.from_adc_left_channel_valid  (w_adc_left_valid),                                   //                            .valid
+		.from_adc_right_channel_ready (w_adc_right_ready),                                   // avalon_right_channel_source.ready
+		.from_adc_right_channel_data  (w_adc_right_data),                                   //                            .data
+		.from_adc_right_channel_valid (w_adc_right_valid),                                   //                            .valid
+		.to_dac_left_channel_data     (w_dac_left_data),                                   //    avalon_left_channel_sink.data
+		.to_dac_left_channel_valid    (w_dac_left_valid),                                   //                            .valid
+		.to_dac_left_channel_ready    (w_dac_left_ready),                                   //                            .ready
+		.to_dac_right_channel_data    (w_dac_right_data),                                   //   avalon_right_channel_sink.data
+		.to_dac_right_channel_valid   (w_dac_right_valid),                                   //                            .valid
+		.to_dac_right_channel_ready   (w_dac_right_ready),                                 //                            .ready
+        .address      (w_address),
+        .byteenable   (w_byteenable),
+        .read         (w_read),
+        .write        (w_write),
+        .writedata    (w_writedata),
+        .readdata     (w_readdata),
+        .readdatavalid(w_readdatavalid)     
     );
-    SDRAM SDRAMController(
-        .clk_clk(CLOCK_50),
-        .rst_reset_n(~rst_main),
-        .sdram_avm_address(w_avm_address),
-        .sdram_avm_byteenable_n(~w_avm_byteenable),
-        .sdram_avm_chipselect(w_avm_chipselect),
-        .sdram_avm_writedata(w_avm_writedata),
-        .sdram_avm_read_n(~w_avm_read),
-        .sdram_avm_write_n(~w_avm_write),
-        .sdram_avm_readdata(w_avm_readdata),
-        .sdram_avm_readdatavalid(w_avm_readdatavalid),
-        .sdram_avm_waitrequest(w_avm_waitrequest),
-        .sdram_clk_clk(DRAM_CLK),
-        .sdram_wire_addr(DRAM_ADDR),
-        .sdram_wire_ba(DRAM_BA),
-        .sdram_wire_cas_n(DRAM_CAS_N),
-        .sdram_wire_cke(DRAM_CKE),
-        .sdram_wire_cs_n(DRAM_CS_N),
-        .sdram_wire_dq(DRAM_DQ),
-        .sdram_wire_dqm(DRAM_DQM),
-        .sdram_wire_ras_n(DRAM_RAS_N),
-        .sdram_wire_we_n(DRAM_WE_N)
-    );
-    /*SRAMController sramcontroller(
-        .i_clk(CLOCK_50),
-        .i_rst(rst_main),
-        .i_read(w_mem_read),
-        .i_write(w_mem_write),
-        .i_addr(w_mem_addr),
-        .io_data(w_mem_data),
-        .o_done(w_mem_done),
-        .SRAM_WE_N(SRAM_WE_N),
-        .SRAM_ADDR(SRAM_ADDR),
-        .SRAM_DQ(SRAM_DQ)
-    );*/
-    // Input Controller
-    InputController inputController(
+	// Input Controller
+	InputController inputController(
         .i_clk(CLOCK_50),
         .i_rst(rst_main),
         .i_btn_play(KEY[3]),
@@ -321,65 +331,39 @@ module DE2_115 (
         .i_sw_interpol(SW[9]),
         .o_input_event(w_input_event)
     );
-    // Output Controller
-	 LCD lcd_controller(
-        .LCD_DATA(LCD_DATA),
-        .LCD_EN(LCD_EN),
-        .LCD_RW(LCD_RW),
-        .LCD_RS(LCD_RS),
-        .LCD_ON(LCD_ON),
-        .LCD_BLON(LCD_BLON),
-        .BUSY(busy),
-        .START(start),
-        .CLEAR(clear),
-
-        .CHARACTER(char),
-        .ADDRESS(addr),
-        .i_rst(SW[17]),
-        .i_clk(CLOCK_50),
-    );
-    
-    LCD_wrapper LCD_top(
-        .CHARACTER(char),
-        .ADDRESS(addr),
-
-        .START(start),
-        .CLEAR(clear),
-        .BUSY(busy),
-
-        .i_clk(CLOCK2_50),
-        .i_rst(SW[17]),
-        .STATUS(w_event_hold),
-        .TIME(w_time)
-    );
-    
-    wire [7:0] char;
-    wire [7:0] addr;
-    wire start;
-    wire busy;
-    wire clear;
-	 
-	 /* Legacy
-    OutputController outputController(
-        .i_clk(CLOCK_50),
-        .i_rst(rst_main),
-        .i_output_event(w_output_event),
-        .i_time(w_time)
-    );
-        assign w_aud_init_fin = 1;
-        wire w_clk100k;
-        I2CPLL i2cPLL(
-            .clk_clk(CLOCK2_50),
-            .reset_reset_n(~rst_main),
-            .i2c_clk(w_clk100k)
-        );
-        AudioInit audioInit(
-            .i_start(w_aud_init_start),
-            .i_rst(rst_main),
-            .i_clk100k(w_clk100k),
-            .o_I2C_SCLK(I2C_SCLK),
-            .io_I2C_SDAT(I2C_SDAT),
-            .o_finished(w_aud_init_fin)
-        );
-    */
+	// Recorder
+	Recorder recorder(
+		.i_clk(CLOCK_50),
+		.i_rst(rst_main),
+		// Input
+		.i_input_event(w_input_event),
+        // Output
+		.o_event_hold(w_event_hold),
+		.o_time(w_time),
+        // avalon_audio_slave
+        // avalon_left_channel_source
+		.from_adc_left_channel_ready(w_adc_left_ready),
+        .from_adc_left_channel_data(w_adc_left_data),
+        .from_adc_left_channel_valid(w_adc_left_valid),
+        // avalon_right_channel_source
+        .from_adc_right_channel_ready(w_adc_right_ready),
+        .from_adc_right_channel_data(w_adc_right_data),
+        .from_adc_right_channel_valid(w_adc_right_valid),
+        // avalon_left_channel_sink
+        .to_dac_left_channel_data(w_dac_left_data),
+        .to_dac_left_channel_valid(w_dac_left_valid),
+        .to_dac_left_channel_ready(w_dac_left_ready),
+        // avalon_left_channel_sink
+        .to_dac_right_channel_data(w_dac_right_data),
+        .to_dac_right_channel_valid(w_dac_right_valid),
+        .to_dac_right_channel_ready(w_dac_right_ready),
+        // avalon_sram_slave
+        .address      (w_address),
+        .byteenable   (w_byteenable),
+        .read         (w_read),
+        .write        (w_write),
+        .writedata    (w_writedata),
+        .readdata     (w_readdata),
+        .readdatavalid(w_readdatavalid)
+	);  
 endmodule
