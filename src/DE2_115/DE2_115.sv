@@ -219,96 +219,10 @@ module DE2_115 (
     wire    [31:0]  w_mem_addr;
     wire    [15:0]  w_mem_data;
     wire            w_mem_done;
-	 wire    [63:0]  w_time;
+	wire    [63:0]  w_time;
     
     wire    [15:0]  w_input_event;
     wire    [15:0]  w_event_hold;
-    Recorder recorder(
-        .i_clk(CLOCK_50),
-        .i_rst(rst_main),
-        .i_input_event(w_input_event),
-        .o_output_event(),
-		  
-        .o_event_hold(w_event_hold),
-		.o_time(w_time),
-		  
-        .AUD_BCLK(AUD_BCLK),
-        .AUD_ADCLRCK(AUD_ADCLRCK),
-        .AUD_ADCDAT(AUD_ADCDAT),
-        .AUD_DACLRCK(AUD_DACLRCK),
-        .AUD_DACDAT(AUD_DACDAT),
-        .o_mem_read(w_mem_read),
-        .o_mem_write(w_mem_write),
-        .o_mem_addr(w_mem_addr),
-        .io_mem_data(w_mem_data),
-        .i_mem_done(w_mem_done),
-        
-    );
-    
-
-    // Memory Controller
-    wire [24:0] w_avm_address;
-    wire [3:0]  w_avm_byteenable;
-    wire        w_avm_chipselect;
-    wire [31:0] w_avm_writedata;
-    wire        w_avm_read;
-    wire        w_avm_write;
-    wire [31:0] w_avm_readdata;
-    wire        w_avm_readdatavalid;
-    wire        w_avm_waitrequest;
-    sdram_avm_controller sdram_avm_controller_inst(
-        .clk(CLOCK_50),
-        .rst(rst_main),
-        .i_read(w_mem_read),
-        .i_write(w_mem_write),
-        .i_addr(w_mem_addr),
-        .io_data(w_mem_data),
-        .o_done(w_mem_done),
-        .o_avm_address(w_avm_address),
-        .o_avm_byteenable(w_avm_byteenable),
-        .o_avm_chipselect(w_avm_chipselect),
-        .o_avm_writedata(w_avm_writedata),
-        .o_avm_read(w_avm_read),
-        .o_avm_write(w_avm_write),
-        .i_avm_readdata(w_avm_readdata),
-        .i_avm_readdatavalid(w_avm_readdatavalid),
-        .i_avm_waitrequest(w_avm_waitrequest)
-    );
-    SDRAM SDRAMController(
-        .clk_clk(CLOCK_50),
-        .rst_reset_n(~rst_main),
-        .sdram_avm_address(w_avm_address),
-        .sdram_avm_byteenable_n(~w_avm_byteenable),
-        .sdram_avm_chipselect(w_avm_chipselect),
-        .sdram_avm_writedata(w_avm_writedata),
-        .sdram_avm_read_n(~w_avm_read),
-        .sdram_avm_write_n(~w_avm_write),
-        .sdram_avm_readdata(w_avm_readdata),
-        .sdram_avm_readdatavalid(w_avm_readdatavalid),
-        .sdram_avm_waitrequest(w_avm_waitrequest),
-        .sdram_clk_clk(DRAM_CLK),
-        .sdram_wire_addr(DRAM_ADDR),
-        .sdram_wire_ba(DRAM_BA),
-        .sdram_wire_cas_n(DRAM_CAS_N),
-        .sdram_wire_cke(DRAM_CKE),
-        .sdram_wire_cs_n(DRAM_CS_N),
-        .sdram_wire_dq(DRAM_DQ),
-        .sdram_wire_dqm(DRAM_DQM),
-        .sdram_wire_ras_n(DRAM_RAS_N),
-        .sdram_wire_we_n(DRAM_WE_N)
-    );
-    /*SRAMController sramcontroller(
-        .i_clk(CLOCK_50),
-        .i_rst(rst_main),
-        .i_read(w_mem_read),
-        .i_write(w_mem_write),
-        .i_addr(w_mem_addr),
-        .io_data(w_mem_data),
-        .o_done(w_mem_done),
-        .SRAM_WE_N(SRAM_WE_N),
-        .SRAM_ADDR(SRAM_ADDR),
-        .SRAM_DQ(SRAM_DQ)
-    );*/
     // Input Controller
     InputController inputController(
         .i_clk(CLOCK_50),
@@ -321,8 +235,59 @@ module DE2_115 (
         .i_sw_interpol(SW[9]),
         .o_input_event(w_input_event)
     );
+    Recorder recorder(
+        .i_clk(CLOCK_50),
+        .i_rst(rst_main),
+        .i_input_event(w_input_event),
+		  
+        .o_event_hold(w_event_hold),
+		.o_time(w_time),
+		// avalon_audio_slave
+        // avalon_left_channel_source
+        .from_adc_left_channel_ready(from_adc_left_channel_ready),
+        .from_adc_left_channel_data(from_adc_left_channel_data),
+        .from_adc_left_channel_valid(from_adc_left_channel_valid),
+        // avalon_right_channel_source
+        .from_adc_right_channel_ready(from_adc_right_channel_ready),
+        .from_adc_right_channel_data(from_adc_right_channel_data),
+        .from_adc_right_channel_valid(from_adc_right_channel_valid),
+        // avalon_left_channel_sink
+        .to_dac_left_channel_data(to_dac_left_channel_data),
+        .to_dac_left_channel_valid(to_dac_left_channel_valid),
+        .to_dac_left_channel_ready(to_dac_left_channel_ready),
+        // avalon_left_channel_sink
+        .to_dac_right_channel_data(to_dac_right_channel_data),
+        .to_dac_right_channel_valid(to_dac_right_channel_valid),
+        .to_dac_right_channel_ready(to_dac_right_channel_ready),
+        // avalon_sram_slave
+        .address(address),
+        .byteenable(byteenable),
+        .read(read),
+        .write(write),
+        .writedata(writedata),
+        .readdata(readdata),
+        .readdatavalid(readdatavalid)   
+        
+    );
+    
+
+    // Memory Controller
+    
+    /*SRAMController sramcontroller(
+        .i_clk(CLOCK_50),
+        .i_rst(rst_main),
+        .i_read(w_mem_read),
+        .i_write(w_mem_write),
+        .i_addr(w_mem_addr),
+        .io_data(w_mem_data),
+        .o_done(w_mem_done),
+        .SRAM_WE_N(SRAM_WE_N),
+        .SRAM_ADDR(SRAM_ADDR),
+        .SRAM_DQ(SRAM_DQ)
+    );*/
+
     // Output Controller
-	 LCD lcd_controller(
+	/*LCD lcd_controller(
         .LCD_DATA(LCD_DATA),
         .LCD_EN(LCD_EN),
         .LCD_RW(LCD_RW),
@@ -351,7 +316,7 @@ module DE2_115 (
         .i_rst(SW[17]),
         .STATUS(w_event_hold),
         .TIME(w_time)
-    );
+    );*/
     
     wire [7:0] char;
     wire [7:0] addr;

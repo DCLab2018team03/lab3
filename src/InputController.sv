@@ -11,7 +11,7 @@ module InputController(
     input   [8:0]   i_sw_speed,
     input           i_sw_interpol,
     // Recorder Core
-    output  [15:0]  o_input_event       // 4code,2speed,4param,1inter,5reserved
+    output logic [15:0]  o_input_event       // 4code,2speed,4param,1inter,5reserved
 );
 
     logic play_bit, pause_bit, stop_bit, record_bit;

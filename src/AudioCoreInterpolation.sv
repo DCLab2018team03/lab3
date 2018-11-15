@@ -2,7 +2,7 @@ module AudioCoreInterpolation (
     input   [15:0]  i_data_prev,
     input   [15:0]  i_data,
     input   [3:0]   i_divisor,
-    output  [15:0]  o_quotient
+    output logic [15:0]  o_quotient
 );
     wire [15:0] C, _C;
     assign C = i_data + ~i_data_prev + 16'b1;

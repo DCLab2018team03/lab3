@@ -44,10 +44,10 @@ module RecorderCore(
         case(state)
             IDLE: begin
                 case(control_code)
-                    REC_PLAY begin
+                    REC_PLAY: begin
                         n_state = PLAY;
                     end
-                    REC_RECORD begin
+                    REC_RECORD: begin
                         n_state = RECORD;
                     end
                     default: n_state = IDLE;
@@ -55,10 +55,10 @@ module RecorderCore(
             end
             PLAY: begin
                 case(control_code)
-                    REC_PAUSE begin
+                    REC_PAUSE: begin
                         n_state = PAUSE;
                     end
-                    REC_STOP begin
+                    REC_STOP: begin
                         n_state = IDLE;
                     end
                     default: n_state = state;
@@ -69,10 +69,10 @@ module RecorderCore(
             end
             PAUSE: begin
                 case(control_code)
-                    REC_PLAY begin
+                    REC_PLAY: begin
                         n_state = PLAY;
                     end
-                    REC_STOP begin
+                    REC_STOP: begin
                         n_state = IDLE;
                     end
                     default: n_state = state;
@@ -83,10 +83,10 @@ module RecorderCore(
             end
             RECORD: begin  // can merge with PLAY
                 case(control_code)
-                    REC_PAUSE begin
+                    REC_PAUSE: begin
                         n_state = PAUSE;
                     end
-                    REC_STOP begin
+                    REC_STOP: begin
                         n_state = IDLE;
                     end
                     default: n_state = state;
