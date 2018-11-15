@@ -23,7 +23,7 @@ module AudioCore(
     output logic to_dac_right_channel_valid,
     input  to_dac_right_channel_ready,
     // avalon_sram_slave
-    output logic [20:0] address,
+    output logic [19:0] address,
     output logic [1:0]  byteenable,
     output logic read,
     output logic write,

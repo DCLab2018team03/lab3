@@ -1,0 +1,181 @@
+/*
+WARNING: Do NOT edit the input and output ports in this file in a text
+editor if you plan to continue editing the block that represents it in
+the Block Editor! File corruption is VERY likely to occur.
+*/
+/*
+Copyright (C) 1991-2015 Altera Corporation. All rights reserved.
+Your use of Altera Corporation's design tools, logic functions 
+and other software and tools, and its AMPP partner logic 
+functions, and any output files from any of the foregoing 
+(including device programming or simulation files), and any 
+associated documentation or information are expressly subject 
+to the terms and conditions of the Altera Program License 
+Subscription Agreement, the Altera Quartus II License Agreement,
+the Altera MegaCore Function License Agreement, or other 
+applicable license agreement, including, without limitation, 
+that your use is for the sole purpose of programming logic 
+devices manufactured by Altera and sold by Altera or its 
+authorized distributors.  Please refer to the applicable 
+agreement for further details.
+*/
+(header "symbol" (version "1.1"))
+(symbol
+	(rect 0 0 656 440)
+	(text "Total" (rect 314 -1 332 11)(font "Arial" (font_size 10)))
+	(text "inst" (rect 8 424 20 436)(font "Arial" ))
+	(port
+		(pt 0 72)
+		(input)
+		(text "audio_0_external_interface_ADCDAT" (rect 0 0 156 12)(font "Arial" (font_size 8)))
+		(text "audio_0_external_interface_ADCDAT" (rect 4 61 202 72)(font "Arial" (font_size 8)))
+		(line (pt 0 72)(pt 288 72)(line_width 1))
+	)
+	(port
+		(pt 0 88)
+		(input)
+		(text "audio_0_external_interface_ADCLRCK" (rect 0 0 164 12)(font "Arial" (font_size 8)))
+		(text "audio_0_external_interface_ADCLRCK" (rect 4 77 208 88)(font "Arial" (font_size 8)))
+		(line (pt 0 88)(pt 288 88)(line_width 1))
+	)
+	(port
+		(pt 0 104)
+		(input)
+		(text "audio_0_external_interface_BCLK" (rect 0 0 139 12)(font "Arial" (font_size 8)))
+		(text "audio_0_external_interface_BCLK" (rect 4 93 190 104)(font "Arial" (font_size 8)))
+		(line (pt 0 104)(pt 288 104)(line_width 1))
+	)
+	(port
+		(pt 0 136)
+		(input)
+		(text "audio_0_external_interface_DACLRCK" (rect 0 0 164 12)(font "Arial" (font_size 8)))
+		(text "audio_0_external_interface_DACLRCK" (rect 4 125 208 136)(font "Arial" (font_size 8)))
+		(line (pt 0 136)(pt 288 136)(line_width 1))
+	)
+	(port
+		(pt 0 232)
+		(input)
+		(text "clk_clk" (rect 0 0 27 12)(font "Arial" (font_size 8)))
+		(text "clk_clk" (rect 4 221 46 232)(font "Arial" (font_size 8)))
+		(line (pt 0 232)(pt 288 232)(line_width 1))
+	)
+	(port
+		(pt 0 272)
+		(input)
+		(text "reset_reset_n" (rect 0 0 56 12)(font "Arial" (font_size 8)))
+		(text "reset_reset_n" (rect 4 261 82 272)(font "Arial" (font_size 8)))
+		(line (pt 0 272)(pt 288 272)(line_width 1))
+	)
+	(port
+		(pt 0 120)
+		(output)
+		(text "audio_0_external_interface_DACDAT" (rect 0 0 156 12)(font "Arial" (font_size 8)))
+		(text "audio_0_external_interface_DACDAT" (rect 4 109 202 120)(font "Arial" (font_size 8)))
+		(line (pt 0 120)(pt 288 120)(line_width 1))
+	)
+	(port
+		(pt 0 192)
+		(output)
+		(text "audio_and_video_config_0_external_interface_SCLK" (rect 0 0 215 12)(font "Arial" (font_size 8)))
+		(text "audio_and_video_config_0_external_interface_SCLK" (rect 4 181 292 192)(font "Arial" (font_size 8)))
+		(line (pt 0 192)(pt 288 192)(line_width 1))
+	)
+	(port
+		(pt 0 328)
+		(output)
+		(text "sram_0_external_interface_ADDR[19..0]" (rect 0 0 168 12)(font "Arial" (font_size 8)))
+		(text "sram_0_external_interface_ADDR[19..0]" (rect 4 317 226 328)(font "Arial" (font_size 8)))
+		(line (pt 0 328)(pt 288 328)(line_width 3))
+	)
+	(port
+		(pt 0 344)
+		(output)
+		(text "sram_0_external_interface_LB_N" (rect 0 0 139 12)(font "Arial" (font_size 8)))
+		(text "sram_0_external_interface_LB_N" (rect 4 333 184 344)(font "Arial" (font_size 8)))
+		(line (pt 0 344)(pt 288 344)(line_width 1))
+	)
+	(port
+		(pt 0 360)
+		(output)
+		(text "sram_0_external_interface_UB_N" (rect 0 0 140 12)(font "Arial" (font_size 8)))
+		(text "sram_0_external_interface_UB_N" (rect 4 349 184 360)(font "Arial" (font_size 8)))
+		(line (pt 0 360)(pt 288 360)(line_width 1))
+	)
+	(port
+		(pt 0 376)
+		(output)
+		(text "sram_0_external_interface_CE_N" (rect 0 0 141 12)(font "Arial" (font_size 8)))
+		(text "sram_0_external_interface_CE_N" (rect 4 365 184 376)(font "Arial" (font_size 8)))
+		(line (pt 0 376)(pt 288 376)(line_width 1))
+	)
+	(port
+		(pt 0 392)
+		(output)
+		(text "sram_0_external_interface_OE_N" (rect 0 0 141 12)(font "Arial" (font_size 8)))
+		(text "sram_0_external_interface_OE_N" (rect 4 381 184 392)(font "Arial" (font_size 8)))
+		(line (pt 0 392)(pt 288 392)(line_width 1))
+	)
+	(port
+		(pt 0 408)
+		(output)
+		(text "sram_0_external_interface_WE_N" (rect 0 0 145 12)(font "Arial" (font_size 8)))
+		(text "sram_0_external_interface_WE_N" (rect 4 397 184 408)(font "Arial" (font_size 8)))
+		(line (pt 0 408)(pt 288 408)(line_width 1))
+	)
+	(port
+		(pt 0 176)
+		(bidir)
+		(text "audio_and_video_config_0_external_interface_SDAT" (rect 0 0 217 12)(font "Arial" (font_size 8)))
+		(text "audio_and_video_config_0_external_interface_SDAT" (rect 4 165 292 176)(font "Arial" (font_size 8)))
+		(line (pt 0 176)(pt 288 176)(line_width 1))
+	)
+	(port
+		(pt 0 312)
+		(bidir)
+		(text "sram_0_external_interface_DQ[15..0]" (rect 0 0 152 12)(font "Arial" (font_size 8)))
+		(text "sram_0_external_interface_DQ[15..0]" (rect 4 301 214 312)(font "Arial" (font_size 8)))
+		(line (pt 0 312)(pt 288 312)(line_width 3))
+	)
+	(drawing
+		(text "audio_0_external_interface" (rect 130 43 416 99)(font "Arial" (color 128 0 0)(font_size 9)))
+		(text "ADCDAT" (rect 293 67 622 144)(font "Arial" (color 0 0 0)))
+		(text "ADCLRCK" (rect 293 83 628 176)(font "Arial" (color 0 0 0)))
+		(text "BCLK" (rect 293 99 610 208)(font "Arial" (color 0 0 0)))
+		(text "DACDAT" (rect 293 115 622 240)(font "Arial" (color 0 0 0)))
+		(text "DACLRCK" (rect 293 131 628 272)(font "Arial" (color 0 0 0)))
+		(text "audio_and_video_config_0_external_interface" (rect 20 147 298 307)(font "Arial" (color 128 0 0)(font_size 9)))
+		(text "SDAT" (rect 293 171 610 352)(font "Arial" (color 0 0 0)))
+		(text "SCLK" (rect 293 187 610 384)(font "Arial" (color 0 0 0)))
+		(text "clk" (rect 273 203 564 419)(font "Arial" (color 128 0 0)(font_size 9)))
+		(text "clk" (rect 293 227 604 464)(font "Arial" (color 0 0 0)))
+		(text "reset" (rect 259 243 548 499)(font "Arial" (color 128 0 0)(font_size 9)))
+		(text "reset_n" (rect 293 267 628 544)(font "Arial" (color 0 0 0)))
+		(text "sram_0_external_interface" (rect 131 283 412 579)(font "Arial" (color 128 0 0)(font_size 9)))
+		(text "DQ" (rect 293 307 598 624)(font "Arial" (color 0 0 0)))
+		(text "ADDR" (rect 293 323 610 656)(font "Arial" (color 0 0 0)))
+		(text "LB_N" (rect 293 339 610 688)(font "Arial" (color 0 0 0)))
+		(text "UB_N" (rect 293 355 610 720)(font "Arial" (color 0 0 0)))
+		(text "CE_N" (rect 293 371 610 752)(font "Arial" (color 0 0 0)))
+		(text "OE_N" (rect 293 387 610 784)(font "Arial" (color 0 0 0)))
+		(text "WE_N" (rect 293 403 610 816)(font "Arial" (color 0 0 0)))
+		(text " Total " (rect 632 424 1306 858)(font "Arial" ))
+		(line (pt 288 32)(pt 368 32)(line_width 1))
+		(line (pt 368 32)(pt 368 424)(line_width 1))
+		(line (pt 288 424)(pt 368 424)(line_width 1))
+		(line (pt 288 32)(pt 288 424)(line_width 1))
+		(line (pt 289 52)(pt 289 140)(line_width 1))
+		(line (pt 290 52)(pt 290 140)(line_width 1))
+		(line (pt 289 156)(pt 289 196)(line_width 1))
+		(line (pt 290 156)(pt 290 196)(line_width 1))
+		(line (pt 289 212)(pt 289 236)(line_width 1))
+		(line (pt 290 212)(pt 290 236)(line_width 1))
+		(line (pt 289 252)(pt 289 276)(line_width 1))
+		(line (pt 290 252)(pt 290 276)(line_width 1))
+		(line (pt 289 292)(pt 289 412)(line_width 1))
+		(line (pt 290 292)(pt 290 412)(line_width 1))
+		(line (pt 0 0)(pt 656 0)(line_width 1))
+		(line (pt 656 0)(pt 656 440)(line_width 1))
+		(line (pt 0 440)(pt 656 440)(line_width 1))
+		(line (pt 0 0)(pt 0 440)(line_width 1))
+	)
+)

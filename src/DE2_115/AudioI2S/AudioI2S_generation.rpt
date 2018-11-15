@@ -1,0 +1,42 @@
+Info: Starting: Create block symbol file (.bsf)
+Info: qsys-generate C:\Users\question_mark\Desktop\lab3_test1\src\DE2_115\AudioI2S.qsys --block-symbol-file --output-directory=C:\Users\question_mark\Desktop\lab3_test1\src\DE2_115\AudioI2S --family="Cyclone IV E" --part=EP4CE40F29C7
+Progress: Loading DE2_115/AudioI2S.qsys
+Progress: Reading input file
+Progress: Adding audio_0 [altera_up_avalon_audio 15.0]
+Progress: Parameterizing module audio_0
+Progress: Adding clk_0 [clock_source 15.0]
+Progress: Parameterizing module clk_0
+Progress: Building connections
+Progress: Parameterizing connections
+Progress: Validating
+Progress: Done reading input file
+Warning: AudioI2S.audio_0.avalon_left_channel_source: audio_0.avalon_left_channel_source must be connected to an Avalon-ST sink
+Warning: AudioI2S.audio_0.avalon_right_channel_source: audio_0.avalon_right_channel_source must be connected to an Avalon-ST sink
+Warning: AudioI2S.audio_0.avalon_left_channel_sink: audio_0.avalon_left_channel_sink must be connected to an Avalon-ST source
+Warning: AudioI2S.audio_0.avalon_right_channel_sink: audio_0.avalon_right_channel_sink must be connected to an Avalon-ST source
+Info: ip-generate succeeded.
+Info: Finished: Create block symbol file (.bsf)
+Info: 
+Info: Starting: Create HDL design files for synthesis
+Info: qsys-generate C:\Users\question_mark\Desktop\lab3_test1\src\DE2_115\AudioI2S.qsys --synthesis=VERILOG --output-directory=C:\Users\question_mark\Desktop\lab3_test1\src\DE2_115\AudioI2S\synthesis --family="Cyclone IV E" --part=EP4CE40F29C7
+Progress: Loading DE2_115/AudioI2S.qsys
+Progress: Reading input file
+Progress: Adding audio_0 [altera_up_avalon_audio 15.0]
+Progress: Parameterizing module audio_0
+Progress: Adding clk_0 [clock_source 15.0]
+Progress: Parameterizing module clk_0
+Progress: Building connections
+Progress: Parameterizing connections
+Progress: Validating
+Progress: Done reading input file
+Warning: AudioI2S.audio_0.avalon_left_channel_source: audio_0.avalon_left_channel_source must be connected to an Avalon-ST sink
+Warning: AudioI2S.audio_0.avalon_right_channel_source: audio_0.avalon_right_channel_source must be connected to an Avalon-ST sink
+Warning: AudioI2S.audio_0.avalon_left_channel_sink: audio_0.avalon_left_channel_sink must be connected to an Avalon-ST source
+Warning: AudioI2S.audio_0.avalon_right_channel_sink: audio_0.avalon_right_channel_sink must be connected to an Avalon-ST source
+Info: AudioI2S: Generating AudioI2S "AudioI2S" for QUARTUS_SYNTH
+Info: audio_0: Starting Generation of Audio Controller
+Info: audio_0: "AudioI2S" instantiated altera_up_avalon_audio "audio_0"
+Info: rst_controller: "AudioI2S" instantiated altera_reset_controller "rst_controller"
+Info: AudioI2S: Done "AudioI2S" with 3 modules, 10 files
+Info: ip-generate succeeded.
+Info: Finished: Create HDL design files for synthesis

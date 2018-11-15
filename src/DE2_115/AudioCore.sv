@@ -23,7 +23,7 @@ module AudioCore(
     output logic to_dac_right_channel_valid,
     input  to_dac_right_channel_ready,
     // avalon_sram_slave
-    output logic [20:0] address,
+    output logic [19:0] address,
     output logic [1:0]  byteenable,
     output logic read,
     output logic write,
@@ -85,13 +85,7 @@ module AudioCore(
             slow_counter_r <= 0;
             interpolLeft_r <= 0;
             interpolRight_r <= 0;
-            from_adc_left_channel_ready <= 0;
-            from_adc_right_channel_ready <= 0;
-            to_dac_left_channel_valid <= 0;
-            to_dac_right_channel_valid <= 0;
             address_r <= 0;
-            read <= 0;
-            write <= 0;
         end
         else begin
             state <= n_state;
@@ -121,6 +115,10 @@ module AudioCore(
         address_w = address_r;
         read = 0;
         write = 0;
+		  writedata = 0;
+		  to_dac_left_channel_data = 0;
+		  to_dac_right_channel_data = 0;
+		  slow_counter_w = slow_counter_r
         case (state)
             IDLE: begin
                 case (control_code)
