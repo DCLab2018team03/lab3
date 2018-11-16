@@ -15,7 +15,7 @@ module LCD_wrapper(
 );
     parameter REST   = 2'd0;
     parameter WRITE   = 2'd1;
-    parameter CLEAR  = 2'd2;
+    parameter CLEAR_LCD  = 2'd2;
 
     logic [3:0] control_code, curr_code;
     logic [1:0] control_mode;
@@ -29,14 +29,14 @@ module LCD_wrapper(
     logic [2:0] sec_ten;
     logic [4:0] min;
 
-    assign control_code     = i_input_event[15:12];
-    assign control_mode     = i_input_event[11:10];
-    assign control_speed    = i_input_event[9:6];
-    assign control_interpol = i_input_event[5];
+    assign control_code     = STATUS[15:12];
+    assign control_mode     = STATUS[11:10];
+    assign control_speed    = STATUS[9:6];
+    assign control_interpol = STATUS[5];
 
     always_ff @(posedge i_clk or posedge i_rst) begin
         if ( i_rst ) begin
-            state <= CLEAR;
+            state <= CLEAR_LCD;
             address <= 8'h00;
             curr_code <= 4'd0;
             line <= 1'b0;
@@ -61,9 +61,10 @@ module LCD_wrapper(
                                 min <= min + 1;
                             end else begin
                                 sec_ten <= sec_ten + 1;
-                        sec <= 4'b0;
+                            end
+                        sec_one <= 4'b0;
                     end else begin
-                        sec <= sec + 1;
+                        sec_one <= sec_one + 1;
                     end
                 end else begin
                     clk_count <= clk_count + 1;
@@ -301,6 +302,7 @@ module LCD_wrapper(
                                                     address <= 8'h41;
                                                 end
                                             endcase
+                                        end
                                         8'h41: begin
                                             CHARACTER <= 8'h30+control_speed;
                                             ADDRESS <= 8'h41;
@@ -336,9 +338,10 @@ module LCD_wrapper(
                                 end
                             endcase
                         end
-                    CLEAR: begin
+                    end
+                    CLEAR_LCD: begin
                         if(!BUSY) begin
-                            case(address) begin
+                            case(address)
                                 8'h00: begin
                                     ADDRESS <= 8'h00;
                                     CHARACTER <= 8'h49; // I
@@ -378,6 +381,7 @@ module LCD_wrapper(
                                 end
                                 default: begin
                                     address <= 8'h0;
+                                end
                             endcase
                         end
                     end
