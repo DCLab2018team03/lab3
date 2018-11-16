@@ -179,10 +179,10 @@ module DE2_115 (
     output [7:0]  VGA_G,       // VGA Green[9:0]
     output [7:0]  VGA_B       // VGA Blue[9:0]
 );
-    assign SRAM_CE_N = 1'b0;
+    /*assign SRAM_CE_N = 1'b0;
     assign SRAM_OE_N = 1'b0;
     assign SRAM_LB_N = 1'b0;
-    assign SRAM_UB_N = 1'b0;
+    assign SRAM_UB_N = 1'b0;*/
     assign HEX0 = 7'h7F;
     assign HEX1 = 7'h7F;
     assign HEX2 = 7'h7F;
