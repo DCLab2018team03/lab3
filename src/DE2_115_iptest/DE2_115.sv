@@ -184,7 +184,7 @@ module DE2_115 (
     wire rst_main, record, play;
     logic [1:0] state;
     assign rst_main = SW[17];
-    assign start = SW[16];
+    assign record = SW[16];
     assign play = SW[15];
 
     assign HEX0 = state[0] ? 7'h7F : 7'h00;
@@ -214,18 +214,19 @@ module DE2_115 (
 		.audio_and_video_config_0_external_interface_SCLK(I2C_SCLK), //                                            .SCLK
 		.clk_clk(CLOCK_50),                                          //                                          clk.clk
 		.reset_reset_n(~rst_main),                                   //                                    reset.reset_n
-        .from_adc_left_channel_ready  (w_adc_left_ready),                                   //  avalon_left_channel_source.ready
-		.from_adc_left_channel_data   (w_adc_left_data),                                   //                            .data
-		.from_adc_left_channel_valid  (w_adc_left_valid),                                   //                            .valid
-		.from_adc_right_channel_ready (w_adc_right_ready),                                   // avalon_right_channel_source.ready
-		.from_adc_right_channel_data  (w_adc_right_data),                                   //                            .data
-		.from_adc_right_channel_valid (w_adc_right_valid),                                   //                            .valid
-		.to_dac_left_channel_data     (w_dac_left_data),                                   //    avalon_left_channel_sink.data
-		.to_dac_left_channel_valid    (w_dac_left_valid),                                   //                            .valid
-		.to_dac_left_channel_ready    (w_dac_left_ready),                                   //                            .ready
-		.to_dac_right_channel_data    (w_dac_right_data),                                   //   avalon_right_channel_sink.data
-		.to_dac_right_channel_valid   (w_dac_right_valid),                                   //                            .valid
-		.to_dac_right_channel_ready   (w_dac_right_ready)
+        .audio_0_avalon_left_channel_sink_data  (w_dac_left_data),                                   //  avalon_left_channel_source.ready
+		.audio_0_avalon_left_channel_sink_valid   (w_dac_left_valid),                                   //                            .data
+		.audio_0_avalon_left_channel_sink_ready  (w_dac_left_ready),                                   //                            .valid
+		.audio_0_avalon_left_channel_source_ready (w_adc_left_ready),                                   // avalon_right_channel_source.ready
+		.audio_0_avalon_left_channel_source_data  (w_adc_left_data),                                   //                            .data
+		.audio_0_avalon_left_channel_source_valid (w_adc_left_valid),                                   //                            .valid
+		.audio_0_avalon_right_channel_sink_data     (w_dac_right_data),                                   //    avalon_left_channel_sink.data
+		.audio_0_avalon_right_channel_sink_valid    (w_dac_right_valid),                                   //                            .valid
+		.audio_0_avalon_right_channel_sink_ready    (w_dac_right_ready),                                   //                            .ready
+		.audio_0_avalon_right_channel_source_ready    (w_adc_right_ready),                                   //   avalon_right_channel_sink.data
+		.audio_0_avalon_right_channel_source_data   (w_adc_right_data),                                   //                            .valid
+		.audio_0_avalon_right_channel_source_valid   (w_adc_right_valid),                                 //                            .ready
+        .audio_pll_0_audio_clk_clk      (AUD_XCK)       
     );
 	// Recorder
 	IPCore core(

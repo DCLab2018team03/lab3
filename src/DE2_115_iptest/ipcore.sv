@@ -25,9 +25,9 @@ module IPCore(
     output logic        SRAM_OE_N,   // SRAM Output Enable
     output logic        SRAM_LB_N,   // SRAM Low-byte Data Mask 
     output logic        SRAM_UB_N,   // SRAM High-byte Data Mask 
-    input  logic reccord,
+    input  logic record,
     input  logic play,
-    output logic [1:0] state;
+    output logic [1:0] state
 );
 
 logic [1:0] n_state;
@@ -37,21 +37,21 @@ localparam PLAY = 2'd2;
 
 //SRAM variable
 logic [19:0] n_SRAM_ADDR;
-localparam NOT_SELECT = 5'bz1zzz;
+localparam NOT_SELECT = 5'b01000;
 localparam READ       = 5'b10000;
-localparam WRITE      = 5'b00z00;
+localparam WRITE      = 5'b00000;
 
 logic [19:0] r_SRAM_DQ;
-assign SRAM_DQ = SRAM_WE_N ? 20'bz : r_SRAM_DQ;
-assign to_dac_left_channel_data = SRAM_DQ;
-assign to_dac_right_channel_data = SRAM_DQ; 
+assign SRAM_DQ = SRAM_WE_N ? 20'hzzzzz : r_SRAM_DQ;
+assign to_dac_left_channel_data = state==REC ? from_adc_left_channel_data : SRAM_DQ;
+assign to_dac_right_channel_data = state==REC ? from_adc_left_channel_data : SRAM_DQ;
 
 
 //audio variable
 logic n_from_adc_left_channel_ready;
 
 always_ff @(posedge i_clk or posedge i_rst) begin
-    if ( rst ) begin
+    if ( i_rst ) begin
         state <= IDLE;
         SRAM_ADDR <= 0;
         from_adc_left_channel_ready <= 0;
@@ -69,13 +69,13 @@ always_comb begin
     n_from_adc_left_channel_ready = from_adc_left_channel_ready;
     r_SRAM_DQ = 0;
     setSRAMenable(NOT_SELECT);
-    to_dac_left_channel_valid = 0;
-    to_dac_right_channel_valid = 0;
+    to_dac_left_channel_valid = 1;
+    to_dac_right_channel_valid = 1;
 
     case(state)
         IDLE: begin
             n_SRAM_ADDR = 20'd0;
-            if ( REC ) begin
+            if ( record ) begin
                 n_state = REC;
             end else begin
                 n_state = state;
@@ -90,9 +90,10 @@ always_comb begin
             end else begin
                 n_from_adc_left_channel_ready = 0;
             end
-            if ( PLAY ) begin
+            if ( play ) begin
                 n_state = PLAY;
                 n_SRAM_ADDR = 0;
+                r_SRAM_DQ = from_adc_left_channel_data;
                 setSRAMenable(WRITE);
                 n_from_adc_left_channel_ready = 0;
             end else begin
@@ -109,7 +110,7 @@ always_comb begin
             
             n_SRAM_ADDR = SRAM_ADDR + 2;
             setSRAMenable(READ);
-            n_state = state
+            n_state = state;
         end
         default: n_state = state;
     endcase
@@ -118,14 +119,14 @@ end
 task setSRAMenable;
     input [4:0] mode;
     begin
-        SRAM_WE_N = mode[4]
-        SRAM_CE_N = mode[3]
-        SRAM_OE_N = mode[2]
-        SRAM_LB_N = mode[1]
-        SRAM_UB_N = mode[0]
+        SRAM_WE_N = mode[4];
+        SRAM_CE_N = mode[3];
+        SRAM_OE_N = mode[2];
+        SRAM_LB_N = mode[1];
+        SRAM_UB_N = mode[0];
     end    
 endtask 
-
+endmodule
 /*
 assign from_adc_left_channel_ready  = to_dac_left_channel_ready;
 assign from_adc_right_channel_ready = to_dac_right_channel_ready;
