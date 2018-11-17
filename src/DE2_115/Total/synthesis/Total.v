@@ -25,24 +25,10 @@ module Total (
 		output wire        audio_and_video_config_0_external_interface_SCLK, //                                            .SCLK
 		output wire        audio_pll_0_audio_clk_clk,                        //                       audio_pll_0_audio_clk.clk
 		input  wire        clk_clk,                                          //                                         clk.clk
-		input  wire        reset_reset_n,                                    //                                       reset.reset_n
-		input  wire [19:0] sram_0_avalon_sram_slave_address,                 //                    sram_0_avalon_sram_slave.address
-		input  wire [1:0]  sram_0_avalon_sram_slave_byteenable,              //                                            .byteenable
-		input  wire        sram_0_avalon_sram_slave_read,                    //                                            .read
-		input  wire        sram_0_avalon_sram_slave_write,                   //                                            .write
-		input  wire [15:0] sram_0_avalon_sram_slave_writedata,               //                                            .writedata
-		output wire [15:0] sram_0_avalon_sram_slave_readdata,                //                                            .readdata
-		output wire        sram_0_avalon_sram_slave_readdatavalid,           //                                            .readdatavalid
-		inout  wire [15:0] sram_0_external_interface_DQ,                     //                   sram_0_external_interface.DQ
-		output wire [19:0] sram_0_external_interface_ADDR,                   //                                            .ADDR
-		output wire        sram_0_external_interface_LB_N,                   //                                            .LB_N
-		output wire        sram_0_external_interface_UB_N,                   //                                            .UB_N
-		output wire        sram_0_external_interface_CE_N,                   //                                            .CE_N
-		output wire        sram_0_external_interface_OE_N,                   //                                            .OE_N
-		output wire        sram_0_external_interface_WE_N                    //                                            .WE_N
+		input  wire        reset_reset_n                                     //                                       reset.reset_n
 	);
 
-	wire    rst_controller_reset_out_reset; // rst_controller:reset_out -> [audio_0:reset, audio_and_video_config_0:reset, audio_pll_0:ref_reset_reset, sram_0:reset]
+	wire    rst_controller_reset_out_reset; // rst_controller:reset_out -> [audio_0:reset, audio_and_video_config_0:reset, audio_pll_0:ref_reset_reset]
 
 	Total_audio_0 audio_0 (
 		.clk                          (clk_clk),                                   //                         clk.clk
@@ -85,25 +71,6 @@ module Total (
 		.ref_reset_reset    (rst_controller_reset_out_reset), //    ref_reset.reset
 		.audio_clk_clk      (audio_pll_0_audio_clk_clk),      //    audio_clk.clk
 		.reset_source_reset ()                                // reset_source.reset
-	);
-
-	Total_sram_0 sram_0 (
-		.clk           (clk_clk),                                //                clk.clk
-		.reset         (rst_controller_reset_out_reset),         //              reset.reset
-		.SRAM_DQ       (sram_0_external_interface_DQ),           // external_interface.export
-		.SRAM_ADDR     (sram_0_external_interface_ADDR),         //                   .export
-		.SRAM_LB_N     (sram_0_external_interface_LB_N),         //                   .export
-		.SRAM_UB_N     (sram_0_external_interface_UB_N),         //                   .export
-		.SRAM_CE_N     (sram_0_external_interface_CE_N),         //                   .export
-		.SRAM_OE_N     (sram_0_external_interface_OE_N),         //                   .export
-		.SRAM_WE_N     (sram_0_external_interface_WE_N),         //                   .export
-		.address       (sram_0_avalon_sram_slave_address),       //  avalon_sram_slave.address
-		.byteenable    (sram_0_avalon_sram_slave_byteenable),    //                   .byteenable
-		.read          (sram_0_avalon_sram_slave_read),          //                   .read
-		.write         (sram_0_avalon_sram_slave_write),         //                   .write
-		.writedata     (sram_0_avalon_sram_slave_writedata),     //                   .writedata
-		.readdata      (sram_0_avalon_sram_slave_readdata),      //                   .readdata
-		.readdatavalid (sram_0_avalon_sram_slave_readdatavalid)  //                   .readdatavalid
 	);
 
 	altera_reset_controller #(

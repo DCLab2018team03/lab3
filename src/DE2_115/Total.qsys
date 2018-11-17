@@ -37,7 +37,7 @@
    {
       datum _sortIndex
       {
-         value = "4";
+         value = "3";
          type = "int";
       }
    }
@@ -46,14 +46,6 @@
       datum _sortIndex
       {
          value = "0";
-         type = "int";
-      }
-   }
-   element sram_0
-   {
-      datum _sortIndex
-      {
-         value = "3";
          type = "int";
       }
    }
@@ -115,16 +107,6 @@
    dir="start" />
  <interface name="clk" internal="clk_0.clk_in" type="clock" dir="end" />
  <interface name="reset" internal="clk_0.clk_in_reset" type="reset" dir="end" />
- <interface
-   name="sram_0_avalon_sram_slave"
-   internal="sram_0.avalon_sram_slave"
-   type="avalon"
-   dir="end" />
- <interface
-   name="sram_0_external_interface"
-   internal="sram_0.external_interface"
-   type="conduit"
-   dir="end" />
  <module
    name="audio_0"
    kind="altera_up_avalon_audio"
@@ -145,11 +127,11 @@
   <parameter name="AUTO_CLK_CLOCK_RATE" value="50000000" />
   <parameter name="AUTO_DEVICE_FAMILY" value="Cyclone IV E" />
   <parameter name="audio_in" value="Microphone to ADC" />
-  <parameter name="bit_length" value="16" />
+  <parameter name="bit_length" value="32" />
   <parameter name="board" value="DE2-115" />
   <parameter name="d5m_resolution" value="2592 x 1944" />
   <parameter name="dac_enable" value="true" />
-  <parameter name="data_format" value="Left Justified" />
+  <parameter name="data_format" value="I2S Format" />
   <parameter name="device">On-Board Peripherals</parameter>
   <parameter name="eai" value="true" />
   <parameter name="exposure" value="false" />
@@ -176,19 +158,12 @@
   <parameter name="inputClockFrequency" value="0" />
   <parameter name="resetSynchronousEdges" value="NONE" />
  </module>
- <module name="sram_0" kind="altera_up_avalon_sram" version="15.0" enabled="1">
-  <parameter name="AUTO_CLK_CLOCK_RATE" value="50000000" />
-  <parameter name="AUTO_DEVICE_FAMILY" value="Cyclone IV E" />
-  <parameter name="board" value="DE2-115" />
-  <parameter name="pixel_buffer" value="false" />
- </module>
  <connection kind="clock" version="15.0" start="clk_0.clk" end="audio_0.clk" />
  <connection
    kind="clock"
    version="15.0"
    start="clk_0.clk"
    end="audio_and_video_config_0.clk" />
- <connection kind="clock" version="15.0" start="clk_0.clk" end="sram_0.clk" />
  <connection
    kind="clock"
    version="15.0"
@@ -209,11 +184,6 @@
    version="15.0"
    start="clk_0.clk_reset"
    end="audio_and_video_config_0.reset" />
- <connection
-   kind="reset"
-   version="15.0"
-   start="clk_0.clk_reset"
-   end="sram_0.reset" />
  <interconnectRequirement for="$system" name="qsys_mm.clockCrossingAdapter" value="HANDSHAKE" />
  <interconnectRequirement for="$system" name="qsys_mm.enableEccProtection" value="FALSE" />
  <interconnectRequirement for="$system" name="qsys_mm.insertDefaultSlave" value="FALSE" />

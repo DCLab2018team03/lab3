@@ -10,12 +10,11 @@ Progress: Adding audio_pll_0 [altera_up_avalon_audio_pll 15.0]
 Progress: Parameterizing module audio_pll_0
 Progress: Adding clk_0 [clock_source 15.0]
 Progress: Parameterizing module clk_0
-Progress: Adding sram_0 [altera_up_avalon_sram 15.0]
-Progress: Parameterizing module sram_0
 Progress: Building connections
 Progress: Parameterizing connections
 Progress: Validating
 Progress: Done reading input file
+Info: Total.audio_and_video_config_0: The data format must be Left Justified, if using the Altera UP Audio IP Core.
 Warning: Total.audio_and_video_config_0: audio_and_video_config_0.avalon_av_config_slave must be connected to an Avalon-MM master
 Info: ip-generate succeeded.
 Info: Finished: Create block symbol file (.bsf)
@@ -32,12 +31,11 @@ Progress: Adding audio_pll_0 [altera_up_avalon_audio_pll 15.0]
 Progress: Parameterizing module audio_pll_0
 Progress: Adding clk_0 [clock_source 15.0]
 Progress: Parameterizing module clk_0
-Progress: Adding sram_0 [altera_up_avalon_sram 15.0]
-Progress: Parameterizing module sram_0
 Progress: Building connections
 Progress: Parameterizing connections
 Progress: Validating
 Progress: Done reading input file
+Info: Total.audio_and_video_config_0: The data format must be Left Justified, if using the Altera UP Audio IP Core.
 Warning: Total.audio_and_video_config_0: audio_and_video_config_0.avalon_av_config_slave must be connected to an Avalon-MM master
 Info: Total: Generating Total "Total" for QUARTUS_SYNTH
 Info: audio_0: Starting Generation of Audio Controller
@@ -45,11 +43,9 @@ Info: audio_0: "Total" instantiated altera_up_avalon_audio "audio_0"
 Info: audio_and_video_config_0: Starting Generation of Audio and Video Config
 Info: audio_and_video_config_0: "Total" instantiated altera_up_avalon_audio_and_video_config "audio_and_video_config_0"
 Info: audio_pll_0: "Total" instantiated altera_up_avalon_audio_pll "audio_pll_0"
-Info: sram_0: Starting Generation of SRAM or SSRAM Controller
-Info: sram_0: "Total" instantiated altera_up_avalon_sram "sram_0"
 Info: rst_controller: "Total" instantiated altera_reset_controller "rst_controller"
 Info: audio_pll: "audio_pll_0" instantiated altera_up_altpll "audio_pll"
 Info: reset_from_locked: "audio_pll_0" instantiated altera_up_avalon_reset_from_locked_signal "reset_from_locked"
-Info: Total: Done "Total" with 8 modules, 27 files
+Info: Total: Done "Total" with 7 modules, 26 files
 Info: ip-generate succeeded.
 Info: Finished: Create HDL design files for synthesis

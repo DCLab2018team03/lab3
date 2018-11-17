@@ -1,4 +1,16 @@
 	Total u0 (
+		.audio_0_avalon_left_channel_sink_data            (<connected-to-audio_0_avalon_left_channel_sink_data>),            //            audio_0_avalon_left_channel_sink.data
+		.audio_0_avalon_left_channel_sink_valid           (<connected-to-audio_0_avalon_left_channel_sink_valid>),           //                                            .valid
+		.audio_0_avalon_left_channel_sink_ready           (<connected-to-audio_0_avalon_left_channel_sink_ready>),           //                                            .ready
+		.audio_0_avalon_left_channel_source_ready         (<connected-to-audio_0_avalon_left_channel_source_ready>),         //          audio_0_avalon_left_channel_source.ready
+		.audio_0_avalon_left_channel_source_data          (<connected-to-audio_0_avalon_left_channel_source_data>),          //                                            .data
+		.audio_0_avalon_left_channel_source_valid         (<connected-to-audio_0_avalon_left_channel_source_valid>),         //                                            .valid
+		.audio_0_avalon_right_channel_sink_data           (<connected-to-audio_0_avalon_right_channel_sink_data>),           //           audio_0_avalon_right_channel_sink.data
+		.audio_0_avalon_right_channel_sink_valid          (<connected-to-audio_0_avalon_right_channel_sink_valid>),          //                                            .valid
+		.audio_0_avalon_right_channel_sink_ready          (<connected-to-audio_0_avalon_right_channel_sink_ready>),          //                                            .ready
+		.audio_0_avalon_right_channel_source_ready        (<connected-to-audio_0_avalon_right_channel_source_ready>),        //         audio_0_avalon_right_channel_source.ready
+		.audio_0_avalon_right_channel_source_data         (<connected-to-audio_0_avalon_right_channel_source_data>),         //                                            .data
+		.audio_0_avalon_right_channel_source_valid        (<connected-to-audio_0_avalon_right_channel_source_valid>),        //                                            .valid
 		.audio_0_external_interface_ADCDAT                (<connected-to-audio_0_external_interface_ADCDAT>),                //                  audio_0_external_interface.ADCDAT
 		.audio_0_external_interface_ADCLRCK               (<connected-to-audio_0_external_interface_ADCLRCK>),               //                                            .ADCLRCK
 		.audio_0_external_interface_BCLK                  (<connected-to-audio_0_external_interface_BCLK>),                  //                                            .BCLK
@@ -6,34 +18,8 @@
 		.audio_0_external_interface_DACLRCK               (<connected-to-audio_0_external_interface_DACLRCK>),               //                                            .DACLRCK
 		.audio_and_video_config_0_external_interface_SDAT (<connected-to-audio_and_video_config_0_external_interface_SDAT>), // audio_and_video_config_0_external_interface.SDAT
 		.audio_and_video_config_0_external_interface_SCLK (<connected-to-audio_and_video_config_0_external_interface_SCLK>), //                                            .SCLK
-		.clk_clk                                          (<connected-to-clk_clk>),                                          //                                         clk.clk
-		.reset_reset_n                                    (<connected-to-reset_reset_n>),                                    //                                       reset.reset_n
-		.sram_0_external_interface_DQ                     (<connected-to-sram_0_external_interface_DQ>),                     //                   sram_0_external_interface.DQ
-		.sram_0_external_interface_ADDR                   (<connected-to-sram_0_external_interface_ADDR>),                   //                                            .ADDR
-		.sram_0_external_interface_LB_N                   (<connected-to-sram_0_external_interface_LB_N>),                   //                                            .LB_N
-		.sram_0_external_interface_UB_N                   (<connected-to-sram_0_external_interface_UB_N>),                   //                                            .UB_N
-		.sram_0_external_interface_CE_N                   (<connected-to-sram_0_external_interface_CE_N>),                   //                                            .CE_N
-		.sram_0_external_interface_OE_N                   (<connected-to-sram_0_external_interface_OE_N>),                   //                                            .OE_N
-		.sram_0_external_interface_WE_N                   (<connected-to-sram_0_external_interface_WE_N>),                   //                                            .WE_N
-		.audio_0_avalon_left_channel_source_ready         (<connected-to-audio_0_avalon_left_channel_source_ready>),         //          audio_0_avalon_left_channel_source.ready
-		.audio_0_avalon_left_channel_source_data          (<connected-to-audio_0_avalon_left_channel_source_data>),          //                                            .data
-		.audio_0_avalon_left_channel_source_valid         (<connected-to-audio_0_avalon_left_channel_source_valid>),         //                                            .valid
-		.audio_0_avalon_right_channel_source_ready        (<connected-to-audio_0_avalon_right_channel_source_ready>),        //         audio_0_avalon_right_channel_source.ready
-		.audio_0_avalon_right_channel_source_data         (<connected-to-audio_0_avalon_right_channel_source_data>),         //                                            .data
-		.audio_0_avalon_right_channel_source_valid        (<connected-to-audio_0_avalon_right_channel_source_valid>),        //                                            .valid
-		.audio_0_avalon_left_channel_sink_data            (<connected-to-audio_0_avalon_left_channel_sink_data>),            //            audio_0_avalon_left_channel_sink.data
-		.audio_0_avalon_left_channel_sink_valid           (<connected-to-audio_0_avalon_left_channel_sink_valid>),           //                                            .valid
-		.audio_0_avalon_left_channel_sink_ready           (<connected-to-audio_0_avalon_left_channel_sink_ready>),           //                                            .ready
-		.audio_0_avalon_right_channel_sink_data           (<connected-to-audio_0_avalon_right_channel_sink_data>),           //           audio_0_avalon_right_channel_sink.data
-		.audio_0_avalon_right_channel_sink_valid          (<connected-to-audio_0_avalon_right_channel_sink_valid>),          //                                            .valid
-		.audio_0_avalon_right_channel_sink_ready          (<connected-to-audio_0_avalon_right_channel_sink_ready>),          //                                            .ready
 		.audio_pll_0_audio_clk_clk                        (<connected-to-audio_pll_0_audio_clk_clk>),                        //                       audio_pll_0_audio_clk.clk
-		.sram_0_avalon_sram_slave_address                 (<connected-to-sram_0_avalon_sram_slave_address>),                 //                    sram_0_avalon_sram_slave.address
-		.sram_0_avalon_sram_slave_byteenable              (<connected-to-sram_0_avalon_sram_slave_byteenable>),              //                                            .byteenable
-		.sram_0_avalon_sram_slave_read                    (<connected-to-sram_0_avalon_sram_slave_read>),                    //                                            .read
-		.sram_0_avalon_sram_slave_write                   (<connected-to-sram_0_avalon_sram_slave_write>),                   //                                            .write
-		.sram_0_avalon_sram_slave_writedata               (<connected-to-sram_0_avalon_sram_slave_writedata>),               //                                            .writedata
-		.sram_0_avalon_sram_slave_readdata                (<connected-to-sram_0_avalon_sram_slave_readdata>),                //                                            .readdata
-		.sram_0_avalon_sram_slave_readdatavalid           (<connected-to-sram_0_avalon_sram_slave_readdatavalid>)            //                                            .readdatavalid
+		.clk_clk                                          (<connected-to-clk_clk>),                                          //                                         clk.clk
+		.reset_reset_n                                    (<connected-to-reset_reset_n>)                                     //                                       reset.reset_n
 	);
 
