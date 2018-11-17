@@ -165,10 +165,8 @@ module LCD(
                     case(clear_idx)
                         0: begin
                             addr <= 8'h01;
-                            en <= 0;
-                            rs <= 0;
                             clear_idx <= 1;
-                            state <= WRIT;
+                            state <= COMD;
                             last_state <= CLER;
                         end
                         1: begin
