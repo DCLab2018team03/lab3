@@ -20,6 +20,8 @@ module LCD(
     logic [7:0]  last_addr;
     logic [19:0] dly_val;
     logic [1:0]  init_idx;
+    logic [1:0]  writ_idx;
+    logic [4:0]  writ_count;
     logic [7:0]  data;
     logic        rs;
     logic        en;
@@ -28,13 +30,16 @@ module LCD(
     parameter BOOT_DLY  = 20'hea600; // 19.2ms
     parameter CLEAR_DLY = 20'h12ad4; // 1.53ms
     parameter WRITE_DLY = 20'h866;   // 43us
+    parameter AS_DLY    = 5'h3;      // 40ns
+    parameter EN_DLY    = 5'h10;     // 230ns
 
     parameter INIT = 3'h0;
     parameter IDLE = 3'h1;
     parameter COMD = 3'h2;
     parameter DATA = 3'h3;
-    parameter WAIT = 3'h4;
-    parameter CLER = 3'h5;
+    parameter WRIT = 3'h4;
+    parameter WAIT = 3'h5;
+    parameter CLER = 3'h6;
 
     assign LCD_DATA = data;
     assign LCD_RS = rs;
@@ -50,7 +55,9 @@ module LCD(
             last_state <= INIT;
             last_addr <= 0;
             dly_val <= BOOT_DLY;
-            init_idx <= 0;
+            init_idx <= 2'b0;
+            writ_idx <= 2'b0;
+            writ_count <= 5'b0;
             en <= 0;
             busy <= 1;
         end else begin
@@ -100,18 +107,39 @@ module LCD(
                     end
                 end
                 COMD: begin
-                    en <= 1;
+                    en <= 0;
                     rs <= 0;
                     last_addr <= ADDRESS;
-                    dly_val <= WRITE_DLY;
-                    state <= WAIT;
+                    state <= WRIT;
+                    writ_count <= AS_DLY;
                 end
                 DATA: begin
-                    en <= 1;
+                    en <= 0;
                     rs <= 1;
-                    dly_val <= WRITE_DLY;
                     last_state <= IDLE;
-                    state <= WAIT;
+                    state <= WRIT;
+                    writ_count <= AS_DLY;
+                end
+                WRIT: begin
+                    case(writ_idx)
+                        0: begin
+                            if(writ_count != 0) writ_count <= writ_count -1;
+                            else begin
+                                writ_idx <= 1;
+                                en <= 1;
+                                writ_count <= EN_DLY;
+                            end
+                        end
+                        1: begin
+                            if(writ_count != 0) writ_count <= writ_count -1;
+                            else begin
+                                writ_idx <= 0;
+                                en <= 0;
+                                dly_val <= WRITE_DLY;
+                                state <= WAIT;
+                            end
+                        end
+                    endcase
                 end
                 WAIT: begin
                     if(dly_val > 0) begin
