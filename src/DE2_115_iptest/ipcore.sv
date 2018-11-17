@@ -46,24 +46,27 @@ localparam WRITE      = 5'b00000;
 logic [15:0] r_SRAM_DQ, n_SRAM_DQ;
 assign SRAM_DQ = SRAM_WE_N ? 16'hzzzz : n_SRAM_DQ;
 assign to_dac_left_channel_data = SRAM_DQ;
-assign to_dac_right_channel_data = 16'd0;
+assign to_dac_right_channel_data = SRAM_DQ;
 
 
 //audio variable
+logic n_to_dac_left_channel_valid, n_to_dac_right_channel_valid;
 
-logic [19:0] counter, n_counter;
+
 
 always_ff @(posedge i_clk or posedge i_rst) begin
     if ( i_rst ) begin
         state <= IDLE;
         SRAM_ADDR <= 0;
-        counter <= 0;
         debug <= 0;
+        to_dac_left_channel_valid = 0;
+        to_dac_right_channel_valid = 0;
     end else begin
         state <= n_state;
         SRAM_ADDR <= n_SRAM_ADDR;
-        counter <= n_counter;
         debug <= n_debug;
+        to_dac_left_channel_valid  = n_to_dac_left_channel_valid;
+        to_dac_right_channel_valid = n_to_dac_right_channel_valid;
     end
 end
 
@@ -74,10 +77,9 @@ always_comb begin
     from_adc_left_channel_ready = 0;
     n_SRAM_DQ = 0;
     setSRAMenable(NOT_SELECT);
-    to_dac_left_channel_valid = 0;
-    to_dac_right_channel_valid = 0;
-    n_counter = counter;
     n_debug = debug;
+    n_to_dac_left_channel_valid = to_dac_left_channel_valid;
+    n_to_dac_right_channel_valid = to_dac_right_channel_valid;
 
     case(state)
         IDLE: begin
@@ -85,7 +87,6 @@ always_comb begin
             n_debug = 0;
             if ( record ) begin
                 n_state = REC;
-                n_counter = 0;
             end else begin
                 n_state = state;
             end
@@ -100,25 +101,27 @@ always_comb begin
             if ( play ) begin
                 n_state = PLAY;
                 n_SRAM_ADDR = 0;
+                n_to_dac_left_channel_valid = 1;
+                n_to_dac_right_channel_valid = 0;
             end else begin
                 n_state = REC;
             end
         end
         PLAY: begin
-            to_dac_left_channel_valid = 1;
-            to_dac_right_channel_valid = 1;
             setSRAMenable(READ);
             
             //to_dac_left_channel_data = SRAM_DQ;
             //to_dac_right_channel_data = SRAM_DQ;    
             //They are assigned above        
-            if (to_dac_left_channel_ready) begin
-                n_debug = 1;
+            if (to_dac_left_channel_ready && to_dac_left_channel_valid) begin
+                n_to_dac_right_channel_valid = 1;
+                n_to_dac_left_channel_valid = 0;
                 n_SRAM_ADDR = SRAM_ADDR + 1;
-                n_counter = counter + 1;
-                if (counter == 20'd65535) begin
-                    n_state = IDLE;
-                end
+            end
+            if (to_dac_right_channel_ready && to_dac_right_channel_valid) begin
+                n_to_dac_right_channel_valid = 0;
+                n_to_dac_left_channel_valid = 1;
+                n_SRAM_ADDR = SRAM_ADDR + 1;
             end
             n_state = state;
         end
