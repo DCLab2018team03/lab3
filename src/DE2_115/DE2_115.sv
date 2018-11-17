@@ -19,14 +19,14 @@ module DE2_115 (
     input  [17:0] SW,          // Toggle Switch[17:0]
 
     // 7-SEG Display
-    output [6:0]  HEX0,        // Seven Segment Digit 0
-    output [6:0]  HEX1,        // Seven Segment Digit 1
-    output [6:0]  HEX2,        // Seven Segment Digit 2
-    output [6:0]  HEX3,        // Seven Segment Digit 3
-    output [6:0]  HEX4,        // Seven Segment Digit 4
-    output [6:0]  HEX5,        // Seven Segment Digit 5
-    output [6:0]  HEX6,        // Seven Segment Digit 6
-    output [6:0]  HEX7,        // Seven Segment Digit 7
+    output logic [6:0]  HEX0,        // Seven Segment Digit 0
+    output logic [6:0]  HEX1,        // Seven Segment Digit 1
+    output logic [6:0]  HEX2,        // Seven Segment Digit 2
+    output logic [6:0]  HEX3,        // Seven Segment Digit 3
+    output logic [6:0]  HEX4,        // Seven Segment Digit 4
+    output logic [6:0]  HEX5,        // Seven Segment Digit 5
+    output logic [6:0]  HEX6,        // Seven Segment Digit 6
+    output logic [6:0]  HEX7,        // Seven Segment Digit 7
 
     // LED
     output [8:0]  LEDG,        // LED Green[8:0]
@@ -182,7 +182,7 @@ module DE2_115 (
     /*assign SRAM_CE_N = 1'b0;
     assign SRAM_OE_N = 1'b0;
     assign SRAM_LB_N = 1'b0;
-    assign SRAM_UB_N = 1'b0;*/
+    assign SRAM_UB_N = 1'b0;
     assign HEX0 = 7'h7F;
     assign HEX1 = 7'h7F;
     assign HEX2 = 7'h7F;
@@ -191,7 +191,7 @@ module DE2_115 (
     assign HEX5 = 7'h7F;
     assign HEX6 = 7'h7F;
     assign HEX7 = 7'h7F;
-    
+    */
     ///////////////////////////////////////
     // Main program
     ///////////////////////////////////////
@@ -221,7 +221,6 @@ module DE2_115 (
 	wire            w_dac_right_valid;
     // wire between AudioCore and SRAM
     wire    [19:0]  w_address;
-    wire            w_byteenable;
     wire            w_read;
     wire            w_write;
     wire    [15:0]  w_writedata;
@@ -231,6 +230,21 @@ module DE2_115 (
     wire    [15:0]  w_input_event;
     wire    [15:0]  w_event_hold;
 	wire    [63:0]  w_time;
+
+    // tb
+    always_comb begin
+        HEX0 = 7'd0;
+        HEX1 = 7'd0;
+        HEX2 = 7'd0;
+        HEX3 = 7'd0;
+        case(w_input_event[15:12])
+            4'd1: HEX0 = 7'h7F;
+            4'd2: HEX1 = 7'h7F;
+            4'd3: HEX2 = 7'h7F;
+            4'd4: HEX3 = 7'h7F;
+        endcase
+    end
+
 
     /*
 	// Audio Config
@@ -275,7 +289,6 @@ module DE2_115 (
 		.sram_0_external_interface_OE_N(SRAM_OE_N),                   //                                            .OE_N
 		.sram_0_external_interface_WE_N(SRAM_WE_N),
         .address      (w_address),
-        .byteenable   (w_byteenable),
         .read         (w_read),
         .write        (w_write),
         .writedata    (w_writedata),
@@ -299,25 +312,26 @@ module DE2_115 (
 		.sram_0_external_interface_CE_N(SRAM_CE_N),                   //                                            .CE_N
 		.sram_0_external_interface_OE_N(SRAM_OE_N),                   //                                            .OE_N
 		.sram_0_external_interface_WE_N(SRAM_WE_N),
-        .from_adc_left_channel_ready  (w_adc_left_ready),                                   //  avalon_left_channel_source.ready
-		.from_adc_left_channel_data   (w_adc_left_data),                                   //                            .data
-		.from_adc_left_channel_valid  (w_adc_left_valid),                                   //                            .valid
-		.from_adc_right_channel_ready (w_adc_right_ready),                                   // avalon_right_channel_source.ready
-		.from_adc_right_channel_data  (w_adc_right_data),                                   //                            .data
-		.from_adc_right_channel_valid (w_adc_right_valid),                                   //                            .valid
-		.to_dac_left_channel_data     (w_dac_left_data),                                   //    avalon_left_channel_sink.data
-		.to_dac_left_channel_valid    (w_dac_left_valid),                                   //                            .valid
-		.to_dac_left_channel_ready    (w_dac_left_ready),                                   //                            .ready
-		.to_dac_right_channel_data    (w_dac_right_data),                                   //   avalon_right_channel_sink.data
-		.to_dac_right_channel_valid   (w_dac_right_valid),                                   //                            .valid
-		.to_dac_right_channel_ready   (w_dac_right_ready),                                 //                            .ready
-        .address      (w_address),
-        .byteenable   (w_byteenable),
-        .read         (w_read),
-        .write        (w_write),
-        .writedata    (w_writedata),
-        .readdata     (w_readdata),
-        .readdatavalid(w_readdatavalid)     
+        .audio_0_avalon_left_channel_sink_data  (w_dac_left_data),                                   //  avalon_left_channel_source.ready
+		.audio_0_avalon_left_channel_sink_valid   (w_dac_left_valid),                                   //                            .data
+		.audio_0_avalon_left_channel_sink_ready  (w_dac_left_ready),                                   //                            .valid
+		.audio_0_avalon_left_channel_source_ready (w_adc_left_ready),                                   // avalon_right_channel_source.ready
+		.audio_0_avalon_left_channel_source_data  (w_adc_left_data),                                   //                            .data
+		.audio_0_avalon_left_channel_source_valid (w_adc_left_valid),                                   //                            .valid
+		.audio_0_avalon_right_channel_sink_data     (w_dac_right_data),                                   //    avalon_left_channel_sink.data
+		.audio_0_avalon_right_channel_sink_valid    (w_dac_right_valid),                                   //                            .valid
+		.audio_0_avalon_right_channel_sink_ready    (w_dac_right_ready),                                   //                            .ready
+		.audio_0_avalon_right_channel_source_ready    (w_adc_right_ready),                                   //   avalon_right_channel_sink.data
+		.audio_0_avalon_right_channel_source_data   (w_adc_right_data),                                   //                            .valid
+		.audio_0_avalon_right_channel_source_valid   (w_adc_right_valid),                                 //                            .ready
+        .sram_0_avalon_sram_slave_address      (w_address),
+        .sram_0_avalon_sram_slave_byteenable   (),
+        .sram_0_avalon_sram_slave_read         (w_read),
+        .sram_0_avalon_sram_slave_write        (w_write),
+        .sram_0_avalon_sram_slave_writedata    (w_writedata),
+        .sram_0_avalon_sram_slave_readdata     (w_readdata),
+        .sram_0_avalon_sram_slave_readdatavalid(w_readdatavalid),  
+        .audio_pll_0_audio_clk_clk      (AUD_XCK)   
     );
 	// Input Controller
 	InputController inputController(
@@ -359,7 +373,6 @@ module DE2_115 (
         .to_dac_right_channel_ready(w_dac_right_ready),
         // avalon_sram_slave
         .address      (w_address),
-        .byteenable   (w_byteenable),
         .read         (w_read),
         .write        (w_write),
         .writedata    (w_writedata),

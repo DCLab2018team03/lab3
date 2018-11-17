@@ -16,10 +16,11 @@ module InputController(
 
     logic play_bit, pause_bit, stop_bit, record_bit;
 
-    Debounce db1(.i_in(i_btn_play), .i_clk(i_clk), .o_pos(play_bit));
-    Debounce db2(.i_in(i_btn_play), .i_clk(i_clk), .o_pos(pause_bit));
-    Debounce db3(.i_in(i_btn_play), .i_clk(i_clk), .o_pos(stop_bit));
-    Debounce db4(.i_in(i_btn_play), .i_clk(i_clk), .o_pos(record_bit));
+    Debounce db1(.i_in(i_btn_play), .i_clk(i_clk), .o_neg(play_bit));
+    Debounce db2(.i_in(i_btn_pause), .i_clk(i_clk), .o_neg(pause_bit));
+    Debounce db3(.i_in(i_btn_stop), .i_clk(i_clk), .o_neg(stop_bit));
+    Debounce db4(.i_in(i_btn_record), .i_clk(i_clk), .o_neg(record_bit));
+
 
     logic [3:0] mode;
     assign mode = {play_bit, pause_bit, stop_bit, record_bit};
@@ -33,9 +34,9 @@ module InputController(
     always_ff @(posedge i_clk or posedge i_rst) begin
         if ( i_rst ) begin
             control_code <= 0;
-				control_mode <= 0;
-				control_speed <= 0;
-				control_interpol <= 0;
+			control_mode <= 0;
+			control_speed <= 0;
+			control_interpol <= 0;
         end else begin
             case(mode)
                 4'b1000: control_code <= REC_PLAY;

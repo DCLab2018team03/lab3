@@ -1,3 +1,5 @@
+`include "include/RecorderDefine.vh"
+
 module AudioCore(
     input           i_clk,
     input           i_rst,
@@ -7,24 +9,23 @@ module AudioCore(
     output  o_stop_signal,
     // avalon_audio_slave
     // avalon_left_channel_source
-    output logic from_adc_left_channel_ready,
+    output from_adc_left_channel_ready,
     input  [15:0] from_adc_left_channel_data,
     input  from_adc_left_channel_valid,
     // avalon_right_channel_source
-    output logic from_adc_right_channel_ready,
+    output from_adc_right_channel_ready,
     input  [15:0] from_adc_right_channel_data,
     input  from_adc_right_channel_valid,
     // avalon_left_channel_sink
     output [15:0] to_dac_left_channel_data,
-    output logic to_dac_left_channel_valid,
+    output to_dac_left_channel_valid,
     input  to_dac_left_channel_ready,
     // avalon_right_channel_sink
     output [15:0] to_dac_right_channel_data,
-    output logic to_dac_right_channel_valid,
+    output to_dac_right_channel_valid,
     input  to_dac_right_channel_ready,
     // avalon_sram_slave
     output [19:0] address,
-    output [1:0]  byteenable,
     output read,
     output write,
     output [15:0] writedata,
@@ -36,7 +37,6 @@ module AudioCore(
     logic [1:0] control_mode;  // 0:normal, 1:slow or 2:fast
     logic [4:0] control_speed; // 1X~8X
     logic control_interpol;    // 0 or 1
-    assign byteenable = 2'b01;
     assign control_code     = i_event[15:12];
     assign control_mode     = i_event[11:10];
     assign control_speed    = {1'b0,i_event[9:6]};
@@ -65,6 +65,10 @@ module AudioCore(
     logic writedatalength_counter_w, writedatalength_counter_r;
     logic [15:0] to_dac_left_channel_data_r, to_dac_left_channel_data_w;
     logic [15:0] to_dac_right_channel_data_r, to_dac_right_channel_data_w;
+    logic from_adc_left_channel_ready_r, from_adc_left_channel_ready_w;
+    logic from_adc_right_channel_ready_r, from_adc_right_channel_ready_w;
+    logic to_dac_left_channel_valid_r, to_dac_left_channel_valid_w;
+    logic to_dac_right_channel_valid_r, to_dac_right_channel_valid_w;
 
     assign address = address_r;
     assign read = read_r;
@@ -74,6 +78,8 @@ module AudioCore(
     assign to_dac_right_channel_data = to_dac_right_channel_data_r;
     assign o_time = {play_counter_r, data_length_r};
     assign o_stop_signal = (play_counter_r == data_length_r) ? 1 : 0;
+    assign from_adc_left_channel_ready = from_adc_left_channel_ready_r;
+    assign from_adc_right_channel_ready = from_adc_right_channel_ready_r;
 
     AudioCoreInterpolation interpolLeft(
         .i_data_prev(dacdatLeft_prev_r),
@@ -108,6 +114,8 @@ module AudioCore(
             writedatalength_counter_r <= 0;
             to_dac_left_channel_data_r <= 0;
             to_dac_right_channel_data_r <= 0;
+            from_adc_left_channel_ready_r <= 0;
+            from_adc_right_channel_ready_r <= 0;
         end
         else begin
             state <= n_state;
@@ -128,6 +136,8 @@ module AudioCore(
             writedatalength_counter_r <= writedatalength_counter_w;
             to_dac_left_channel_data_r <= to_dac_left_channel_data_w;
             to_dac_right_channel_data_r <= to_dac_right_channel_data_w;
+            from_adc_left_channel_ready_r <= from_adc_left_channel_ready_w;
+            from_adc_right_channel_ready_r <= from_adc_right_channel_ready_w;
         end
     end
 
@@ -149,20 +159,20 @@ module AudioCore(
         to_dac_left_channel_data_w = to_dac_left_channel_data_r;
         to_dac_right_channel_data_w = to_dac_right_channel_data_r;        
 
-        from_adc_left_channel_ready = 0;
-        from_adc_right_channel_ready = 0;
+        from_adc_left_channel_ready_w = 0;
+        from_adc_right_channel_ready_w = 0;
         to_dac_left_channel_valid = 0;
         to_dac_right_channel_valid = 0;
         case (state)
             IDLE: begin
                 case (control_code)
-                    1: begin
+                    REC_PLAY: begin
                         n_state = PLAY;
                         address_w = 0;
                         read_w = 1;
                         write_w = 0;
                     end
-                    4: begin
+                    REC_RECORD: begin
                         n_state = RECORD;
                         address_w = 4;
                         read_w = 0;
@@ -172,8 +182,8 @@ module AudioCore(
             end
             PLAY: begin
                 case (control_code)
-                    2: n_state = PLAY_PAUSE;
-                    3: n_state = IDLE;
+                    REC_PAUSE: n_state = PLAY_PAUSE;
+                    REC_STOP: n_state = IDLE;
                 endcase
                 read_w = 1;
                 write_w = 0;
@@ -191,14 +201,14 @@ module AudioCore(
                 end
                 else begin
                     case (control_mode)
-                        0: begin
-                            to_dac_left_channel_valid = 0;
+                        REC_NORMAL: begin
+                            //to_dac_left_channel_valid = 0;
                             if (to_dac_left_channel_ready && readdatavalid) begin
                                 dacdatLeft_w = readdata;
                                 to_dac_left_channel_data_w = dacdatLeft_r;
                                 to_dac_left_channel_valid = 1;
                             end
-                            to_dac_right_channel_valid = 0;
+                            //to_dac_right_channel_valid = 0;
                             if (to_dac_right_channel_ready && readdatavalid) begin
                                 dacdatRight_w = readdata;
                                 to_dac_right_channel_data_w = dacdatRight_r;
@@ -207,9 +217,9 @@ module AudioCore(
                             address_w = address_r + 2;
                             play_counter_w = play_counter_r + 2;
                         end
-                        1: begin
+                        REC_SLOW: begin
                             slow_speed_w = control_speed[3:0];
-                            to_dac_left_channel_valid = 0;
+                            //to_dac_left_channel_valid = 0;
                             if (to_dac_left_channel_ready && readdatavalid) begin
                                 dacdatLeft_w = readdata;
                                 if (control_interpol == 0) begin
@@ -232,7 +242,7 @@ module AudioCore(
                                     end
                                 end
                             end
-                            to_dac_right_channel_valid = 0;
+                            //to_dac_right_channel_valid = 0;
                             if (to_dac_right_channel_ready && readdatavalid) begin
                                 dacdatRight_w = readdata;
                                 if (control_interpol == 0) begin
@@ -256,9 +266,9 @@ module AudioCore(
                                 end
                             end                       
                         end
-                        2: begin
-                            to_dac_left_channel_valid = 0;
-                            to_dac_right_channel_valid = 0;
+                        REC_FAST: begin
+                            //to_dac_left_channel_valid = 0;
+                            //to_dac_right_channel_valid = 0;
                             if (to_dac_left_channel_ready && readdatavalid) begin
                                 dacdatLeft_w = readdata;
                                 to_dac_left_channel_data_w = dacdatLeft_r;
@@ -279,11 +289,11 @@ module AudioCore(
             end
             PLAY_PAUSE: begin
                 case (control_code)
-                    1: n_state = PLAY;
-                    3: begin
+                    REC_PLAY: n_state = PLAY;
+                    REC_STOP: begin
                         n_state = IDLE;
                     end
-                    4: begin
+                    REC_RECORD: begin
                         n_state = RECORD;
                         address_w = 4;   
                     end
@@ -291,40 +301,36 @@ module AudioCore(
             end
             RECORD: begin
                 case (control_code)
-                    2: begin
+                    REC_PAUSE: begin
                         n_state = WRITE_DATALENGTH_BEFORE_PAUSE;
                         data_length_w = {12'd0, address_r};
                     end
-                    3: begin
+                    REC_STOP: begin
                         n_state = WRITE_DATALENGTH_BEFORE_STOP;
                         data_length_w = {12'd0, address_r};
                     end
                 endcase
                 write_w = 1;
                 read_w = 0;
-                from_adc_left_channel_ready = 1;
-                from_adc_right_channel_ready = 1;
                 if (from_adc_left_channel_valid) begin
-                    from_adc_left_channel_ready = 0;
+                    from_adc_left_channel_ready_w = 1;
                     writedata_w = from_adc_left_channel_data;
                     address_w = address_r + 2;
                 end
                 if (from_adc_right_channel_valid) begin
-                    from_adc_right_channel_ready = 0;
-                    writedata_w = from_adc_right_channel_data;
-                    address_w = address_r + 2;
+                    from_adc_right_channel_ready_w = 1;
                 end
             end
             RECORD_PAUSE: begin
                 case (control_code)
-                    1: begin
+                    REC_PLAY: begin
                         n_state = PLAY;
                         address_w = 0;
                     end
-                    3: begin
+                    REC_STOP: begin
                         n_state = IDLE;
                     end
-                    4: n_state = RECORD;
+                    REC_RECORD: n_state = RECORD;
                 endcase
             end
             WRITE_DATALENGTH_BEFORE_STOP: begin

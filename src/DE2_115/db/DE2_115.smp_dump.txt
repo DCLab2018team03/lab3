@@ -1,0 +1,36 @@
+
+State Machine - |DE2_115|Recorder:recorder|AudioCore:audioCore|state
+Name state.WRITE_DATALENGTH_BEFORE_PAUSE state.WRITE_DATALENGTH_BEFORE_STOP state.RECORD_PAUSE state.RECORD state.PLAY_PAUSE state.PLAY state.IDLE 
+state.IDLE 0 0 0 0 0 0 0 
+state.PLAY 0 0 0 0 0 1 1 
+state.PLAY_PAUSE 0 0 0 0 1 0 1 
+state.RECORD 0 0 0 1 0 0 1 
+state.RECORD_PAUSE 0 0 1 0 0 0 1 
+state.WRITE_DATALENGTH_BEFORE_STOP 0 1 0 0 0 0 1 
+state.WRITE_DATALENGTH_BEFORE_PAUSE 1 0 0 0 0 0 1 
+
+State Machine - |DE2_115|Recorder:recorder|RecorderCore:recorderCore|state
+Name state.RECORD state.PAUSE state.PLAY state.IDLE 
+state.IDLE 0 0 0 0 
+state.PLAY 0 0 1 1 
+state.PAUSE 0 1 0 1 
+state.RECORD 1 0 0 1 
+
+State Machine - |DE2_115|Total:total|Total_audio_and_video_config_0:audio_and_video_config_0|s_serial_transfer
+Name s_serial_transfer.STATE_6_POST_READ s_serial_transfer.STATE_5_READ_TRANSFER s_serial_transfer.STATE_4_PRE_READ s_serial_transfer.STATE_3_POST_WRITE s_serial_transfer.STATE_2_WRITE_TRANSFER s_serial_transfer.STATE_1_PRE_WRITE s_serial_transfer.STATE_0_IDLE 
+s_serial_transfer.STATE_0_IDLE 0 0 0 0 0 0 0 
+s_serial_transfer.STATE_1_PRE_WRITE 0 0 0 0 0 1 1 
+s_serial_transfer.STATE_2_WRITE_TRANSFER 0 0 0 0 1 0 1 
+s_serial_transfer.STATE_3_POST_WRITE 0 0 0 1 0 0 1 
+s_serial_transfer.STATE_4_PRE_READ 0 0 1 0 0 0 1 
+s_serial_transfer.STATE_5_READ_TRANSFER 0 1 0 0 0 0 1 
+s_serial_transfer.STATE_6_POST_READ 1 0 0 0 0 0 1 
+
+State Machine - |DE2_115|Total:total|Total_audio_and_video_config_0:audio_and_video_config_0|altera_up_av_config_serial_bus_controller:Serial_Bus_Controller|s_serial_protocol
+Name s_serial_protocol.STATE_5_STOP_BIT s_serial_protocol.STATE_4_TRANSFER s_serial_protocol.STATE_3_START_BIT s_serial_protocol.STATE_2_RESTART_BIT s_serial_protocol.STATE_1_INITIALIZE s_serial_protocol.STATE_0_IDLE 
+s_serial_protocol.STATE_0_IDLE 0 0 0 0 0 0 
+s_serial_protocol.STATE_1_INITIALIZE 0 0 0 0 1 1 
+s_serial_protocol.STATE_2_RESTART_BIT 0 0 0 1 0 1 
+s_serial_protocol.STATE_3_START_BIT 0 0 1 0 0 1 
+s_serial_protocol.STATE_4_TRANSFER 0 1 0 0 0 1 
+s_serial_protocol.STATE_5_STOP_BIT 1 0 0 0 0 1 

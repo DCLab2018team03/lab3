@@ -4,6 +4,18 @@
 
 `timescale 1 ps / 1 ps
 module Total (
+		input  wire [15:0] audio_0_avalon_left_channel_sink_data,            //            audio_0_avalon_left_channel_sink.data
+		input  wire        audio_0_avalon_left_channel_sink_valid,           //                                            .valid
+		output wire        audio_0_avalon_left_channel_sink_ready,           //                                            .ready
+		input  wire        audio_0_avalon_left_channel_source_ready,         //          audio_0_avalon_left_channel_source.ready
+		output wire [15:0] audio_0_avalon_left_channel_source_data,          //                                            .data
+		output wire        audio_0_avalon_left_channel_source_valid,         //                                            .valid
+		input  wire [15:0] audio_0_avalon_right_channel_sink_data,           //           audio_0_avalon_right_channel_sink.data
+		input  wire        audio_0_avalon_right_channel_sink_valid,          //                                            .valid
+		output wire        audio_0_avalon_right_channel_sink_ready,          //                                            .ready
+		input  wire        audio_0_avalon_right_channel_source_ready,        //         audio_0_avalon_right_channel_source.ready
+		output wire [15:0] audio_0_avalon_right_channel_source_data,         //                                            .data
+		output wire        audio_0_avalon_right_channel_source_valid,        //                                            .valid
 		input  wire        audio_0_external_interface_ADCDAT,                //                  audio_0_external_interface.ADCDAT
 		input  wire        audio_0_external_interface_ADCLRCK,               //                                            .ADCLRCK
 		input  wire        audio_0_external_interface_BCLK,                  //                                            .BCLK
@@ -11,64 +23,47 @@ module Total (
 		input  wire        audio_0_external_interface_DACLRCK,               //                                            .DACLRCK
 		inout  wire        audio_and_video_config_0_external_interface_SDAT, // audio_and_video_config_0_external_interface.SDAT
 		output wire        audio_and_video_config_0_external_interface_SCLK, //                                            .SCLK
+		output wire        audio_pll_0_audio_clk_clk,                        //                       audio_pll_0_audio_clk.clk
 		input  wire        clk_clk,                                          //                                         clk.clk
 		input  wire        reset_reset_n,                                    //                                       reset.reset_n
+		input  wire [19:0] sram_0_avalon_sram_slave_address,                 //                    sram_0_avalon_sram_slave.address
+		input  wire [1:0]  sram_0_avalon_sram_slave_byteenable,              //                                            .byteenable
+		input  wire        sram_0_avalon_sram_slave_read,                    //                                            .read
+		input  wire        sram_0_avalon_sram_slave_write,                   //                                            .write
+		input  wire [15:0] sram_0_avalon_sram_slave_writedata,               //                                            .writedata
+		output wire [15:0] sram_0_avalon_sram_slave_readdata,                //                                            .readdata
+		output wire        sram_0_avalon_sram_slave_readdatavalid,           //                                            .readdatavalid
 		inout  wire [15:0] sram_0_external_interface_DQ,                     //                   sram_0_external_interface.DQ
 		output wire [19:0] sram_0_external_interface_ADDR,                   //                                            .ADDR
 		output wire        sram_0_external_interface_LB_N,                   //                                            .LB_N
 		output wire        sram_0_external_interface_UB_N,                   //                                            .UB_N
 		output wire        sram_0_external_interface_CE_N,                   //                                            .CE_N
 		output wire        sram_0_external_interface_OE_N,                   //                                            .OE_N
-		output wire        sram_0_external_interface_WE_N,                    //                                            .WE_N
-
-		// avalon_left_channel_source
-		input  wire from_adc_left_channel_ready,
-        output wire [15:0] from_adc_left_channel_data,
-        output wire from_adc_left_channel_valid,
-        // avalon_right_channel_source
-        input  wire from_adc_right_channel_ready,
-        output wire [15:0] from_adc_right_channel_data,
-        output wire from_adc_right_channel_valid,
-        // avalon_left_channel_sink
-        input  wire to_dac_left_channel_data,
-        input  wire [15:0] to_dac_left_channel_valid,
-        output wire to_dac_left_channel_ready,
-        // avalon_left_channel_sink
-        input  wire to_dac_right_channel_data,
-        input  wire [15:0] to_dac_right_channel_valid,
-        output wire to_dac_right_channel_ready,
-
-		input  wire [19:0] address,
-    	input  wire [1:0]  byteenable,
-    	input  wire        read,
-    	input  wire        write,
-    	input  wire [15:0] writedata,
-    	output wire [15:0] readdata,
-    	output wire        readdatavalid
+		output wire        sram_0_external_interface_WE_N                    //                                            .WE_N
 	);
 
-	wire    rst_controller_reset_out_reset; // rst_controller:reset_out -> [audio_0:reset, audio_and_video_config_0:reset, sram_0:reset]
+	wire    rst_controller_reset_out_reset; // rst_controller:reset_out -> [audio_0:reset, audio_and_video_config_0:reset, audio_pll_0:ref_reset_reset, sram_0:reset]
 
 	Total_audio_0 audio_0 (
-		.clk                          (clk_clk),                            //                         clk.clk
-		.reset                        (rst_controller_reset_out_reset),     //                       reset.reset
-		.from_adc_left_channel_ready  (from_adc_left_channel_ready),                                   //  avalon_left_channel_source.ready
-		.from_adc_left_channel_data   (from_adc_left_channel_data),                                   //                            .data
-		.from_adc_left_channel_valid  (from_adc_left_channel_valid),                                   //                            .valid
-		.from_adc_right_channel_ready (from_adc_right_channel_ready),                                   // avalon_right_channel_source.ready
-		.from_adc_right_channel_data  (from_adc_right_channel_data),                                   //                            .data
-		.from_adc_right_channel_valid (from_adc_right_channel_valid),                                   //                            .valid
-		.to_dac_left_channel_data     (to_dac_left_channel_data),                                   //    avalon_left_channel_sink.data
-		.to_dac_left_channel_valid    (to_dac_left_channel_valid),                                   //                            .valid
-		.to_dac_left_channel_ready    (to_dac_left_channel_ready),                                   //                            .ready
-		.to_dac_right_channel_data    (to_dac_right_channel_data),                                   //   avalon_right_channel_sink.data
-		.to_dac_right_channel_valid   (to_dac_right_channel_valid),                                   //                            .valid
-		.to_dac_right_channel_ready   (to_dac_right_channel_ready),                                   //                            .ready
-		.AUD_ADCDAT                   (audio_0_external_interface_ADCDAT),  //          external_interface.export
-		.AUD_ADCLRCK                  (audio_0_external_interface_ADCLRCK), //                            .export
-		.AUD_BCLK                     (audio_0_external_interface_BCLK),    //                            .export
-		.AUD_DACDAT                   (audio_0_external_interface_DACDAT),  //                            .export
-		.AUD_DACLRCK                  (audio_0_external_interface_DACLRCK)  //                            .export
+		.clk                          (clk_clk),                                   //                         clk.clk
+		.reset                        (rst_controller_reset_out_reset),            //                       reset.reset
+		.from_adc_left_channel_ready  (audio_0_avalon_left_channel_source_ready),  //  avalon_left_channel_source.ready
+		.from_adc_left_channel_data   (audio_0_avalon_left_channel_source_data),   //                            .data
+		.from_adc_left_channel_valid  (audio_0_avalon_left_channel_source_valid),  //                            .valid
+		.from_adc_right_channel_ready (audio_0_avalon_right_channel_source_ready), // avalon_right_channel_source.ready
+		.from_adc_right_channel_data  (audio_0_avalon_right_channel_source_data),  //                            .data
+		.from_adc_right_channel_valid (audio_0_avalon_right_channel_source_valid), //                            .valid
+		.to_dac_left_channel_data     (audio_0_avalon_left_channel_sink_data),     //    avalon_left_channel_sink.data
+		.to_dac_left_channel_valid    (audio_0_avalon_left_channel_sink_valid),    //                            .valid
+		.to_dac_left_channel_ready    (audio_0_avalon_left_channel_sink_ready),    //                            .ready
+		.to_dac_right_channel_data    (audio_0_avalon_right_channel_sink_data),    //   avalon_right_channel_sink.data
+		.to_dac_right_channel_valid   (audio_0_avalon_right_channel_sink_valid),   //                            .valid
+		.to_dac_right_channel_ready   (audio_0_avalon_right_channel_sink_ready),   //                            .ready
+		.AUD_ADCDAT                   (audio_0_external_interface_ADCDAT),         //          external_interface.export
+		.AUD_ADCLRCK                  (audio_0_external_interface_ADCLRCK),        //                            .export
+		.AUD_BCLK                     (audio_0_external_interface_BCLK),           //                            .export
+		.AUD_DACDAT                   (audio_0_external_interface_DACDAT),         //                            .export
+		.AUD_DACLRCK                  (audio_0_external_interface_DACLRCK)         //                            .export
 	);
 
 	Total_audio_and_video_config_0 audio_and_video_config_0 (
@@ -85,23 +80,30 @@ module Total (
 		.I2C_SCLK    (audio_and_video_config_0_external_interface_SCLK)  //                       .export
 	);
 
+	Total_audio_pll_0 audio_pll_0 (
+		.ref_clk_clk        (clk_clk),                        //      ref_clk.clk
+		.ref_reset_reset    (rst_controller_reset_out_reset), //    ref_reset.reset
+		.audio_clk_clk      (audio_pll_0_audio_clk_clk),      //    audio_clk.clk
+		.reset_source_reset ()                                // reset_source.reset
+	);
+
 	Total_sram_0 sram_0 (
-		.clk           (clk_clk),                        //                clk.clk
-		.reset         (rst_controller_reset_out_reset), //              reset.reset
-		.SRAM_DQ       (sram_0_external_interface_DQ),   // external_interface.export
-		.SRAM_ADDR     (sram_0_external_interface_ADDR), //                   .export
-		.SRAM_LB_N     (sram_0_external_interface_LB_N), //                   .export
-		.SRAM_UB_N     (sram_0_external_interface_UB_N), //                   .export
-		.SRAM_CE_N     (sram_0_external_interface_CE_N), //                   .export
-		.SRAM_OE_N     (sram_0_external_interface_OE_N), //                   .export
-		.SRAM_WE_N     (sram_0_external_interface_WE_N), //                   .export
-		.address       (address      ),                  //  avalon_sram_slave.address
-		.byteenable    (byteenable   ),                  //                   .byteenable
-		.read          (read         ),                  //                   .read
-		.write         (write        ),                  //                   .write
-		.writedata     (writedata    ),                  //                   .writedata
-		.readdata      (readdata     ),                  //                   .readdata
-		.readdatavalid (readdatavalid)                   //                   .readdatavalid
+		.clk           (clk_clk),                                //                clk.clk
+		.reset         (rst_controller_reset_out_reset),         //              reset.reset
+		.SRAM_DQ       (sram_0_external_interface_DQ),           // external_interface.export
+		.SRAM_ADDR     (sram_0_external_interface_ADDR),         //                   .export
+		.SRAM_LB_N     (sram_0_external_interface_LB_N),         //                   .export
+		.SRAM_UB_N     (sram_0_external_interface_UB_N),         //                   .export
+		.SRAM_CE_N     (sram_0_external_interface_CE_N),         //                   .export
+		.SRAM_OE_N     (sram_0_external_interface_OE_N),         //                   .export
+		.SRAM_WE_N     (sram_0_external_interface_WE_N),         //                   .export
+		.address       (sram_0_avalon_sram_slave_address),       //  avalon_sram_slave.address
+		.byteenable    (sram_0_avalon_sram_slave_byteenable),    //                   .byteenable
+		.read          (sram_0_avalon_sram_slave_read),          //                   .read
+		.write         (sram_0_avalon_sram_slave_write),         //                   .write
+		.writedata     (sram_0_avalon_sram_slave_writedata),     //                   .writedata
+		.readdata      (sram_0_avalon_sram_slave_readdata),      //                   .readdata
+		.readdatavalid (sram_0_avalon_sram_slave_readdatavalid)  //                   .readdatavalid
 	);
 
 	altera_reset_controller #(

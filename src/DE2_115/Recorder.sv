@@ -26,7 +26,6 @@ module Recorder (
     input  to_dac_right_channel_ready,
     // avalon_sram_slave
     output logic [20:0] address,
-    output logic [1:0]  byteenable,
     output logic read,
     output logic write,
     output logic [15:0] writedata,
@@ -34,8 +33,8 @@ module Recorder (
     input  readdatavalid
 );
     wire w_audio_core_stop_signal;
-    assign w_audio_core_stop_signal = 0;
-    assign o_time = 0;
+    //assign w_audio_core_stop_signal = 0;
+    //assign o_time = 0;
     RecorderCore recorderCore(
         .i_clk(i_clk),
         .i_rst(i_rst),
@@ -72,7 +71,6 @@ module Recorder (
         .to_dac_right_channel_ready(to_dac_right_channel_ready),
         // avalon_sram_slave
         .address(address),
-        .byteenable(byteenable),
         .read(read),
         .write(write),
         .writedata(writedata),
