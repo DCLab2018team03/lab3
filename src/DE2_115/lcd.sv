@@ -20,7 +20,8 @@ module LCD(
     logic [7:0]  last_addr;
     logic [20:0] dly_val;
     logic [1:0]  init_idx;
-    logic [1:0]  writ_idx;
+    logic        writ_idx;
+    logic        clear_idx;
     logic [4:0]  writ_count;
     logic [7:0]  data;
     logic        rs;
@@ -56,7 +57,8 @@ module LCD(
             last_addr <= 0;
             dly_val <= BOOT_DLY;
             init_idx <= 2'b0;
-            writ_idx <= 2'b0;
+            writ_idx <= 1'b0;
+            clear_idx <= 1'b0;
             writ_count <= 5'b0;
             en <= 0;
             busy <= 1;
@@ -153,12 +155,21 @@ module LCD(
                     end
                 end
                 CLER: begin
-                    data <= 8'h01;
-                    en <= 0;
-                    rs <= 0;
-                    state <= WRIT;
-                    dly_val <= CLEAR_DLY;
-                    state <= WAIT;
+                    case(clear_idx)
+                        0: begin
+                            data <= 8'h01;
+                            en <= 0;
+                            rs <= 0;
+                            clear_idx <= 1;
+                            state <= WRIT;
+                            last_state <= CLER;
+                        end
+                        1: begin
+                            dly_val <= CLEAR_DLY;
+                            state <= WAIT;
+                            clear_idx <= 0;
+                        end
+                    endcase
                 end
             endcase
         end
