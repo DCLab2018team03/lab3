@@ -80,6 +80,8 @@ module AudioCore(
     assign o_stop_signal = (play_counter_r == data_length_r) ? 1 : 0;
     assign from_adc_left_channel_ready = from_adc_left_channel_ready_r;
     assign from_adc_right_channel_ready = from_adc_right_channel_ready_r;
+    assign to_dac_left_channel_valid = to_dac_left_channel_valid_r;
+    assign to_dac_right_channel_valid = to_dac_right_channel_valid_r;
 
     AudioCoreInterpolation interpolLeft(
         .i_data_prev(dacdatLeft_prev_r),
@@ -116,6 +118,8 @@ module AudioCore(
             to_dac_right_channel_data_r <= 0;
             from_adc_left_channel_ready_r <= 0;
             from_adc_right_channel_ready_r <= 0;
+            to_dac_left_channel_valid_r <= 0;
+            to_dac_right_channel_valid_r <= 0;
         end
         else begin
             state <= n_state;
@@ -138,6 +142,8 @@ module AudioCore(
             to_dac_right_channel_data_r <= to_dac_right_channel_data_w;
             from_adc_left_channel_ready_r <= from_adc_left_channel_ready_w;
             from_adc_right_channel_ready_r <= from_adc_right_channel_ready_w;
+            to_dac_left_channel_valid_r <= to_dac_left_channel_valid_w;
+            to_dac_right_channel_valid_r <= to_dac_right_channel_valid_w;
         end
     end
 
@@ -161,8 +167,8 @@ module AudioCore(
 
         from_adc_left_channel_ready_w = 0;
         from_adc_right_channel_ready_w = 0;
-        to_dac_left_channel_valid = 0;
-        to_dac_right_channel_valid = 0;
+        to_dac_left_channel_valid_w = 0;
+        to_dac_right_channel_valid_w = 0;
         case (state)
             IDLE: begin
                 case (control_code)
@@ -171,6 +177,7 @@ module AudioCore(
                         address_w = 0;
                         read_w = 1;
                         write_w = 0;
+                        play_counter_w = 0;
                     end
                     REC_RECORD: begin
                         n_state = RECORD;
@@ -185,16 +192,18 @@ module AudioCore(
                     REC_PAUSE: n_state = PLAY_PAUSE;
                     REC_STOP: n_state = IDLE;
                 endcase
-                read_w = 1;
-                write_w = 0;
                 if (address_r == 0) begin
                     if (readdatavalid) begin
+                        read_w = 1;
+                        write_w = 0;
                         data_length_w[31:16] = readdata;
                         address_w = 2;
                     end
                 end
                 else if (address_r == 2) begin
                     if (readdatavalid) begin
+                        read_w = 1;
+                        write_w = 0;
                         data_length_w[15:0] = readdata;
                         address_w = 4;
                     end
@@ -202,52 +211,47 @@ module AudioCore(
                 else begin
                     case (control_mode)
                         REC_NORMAL: begin
-                            //to_dac_left_channel_valid = 0;
                             if (to_dac_left_channel_ready && readdatavalid) begin
+                                read_w = 1;
+                                write_w = 0;
                                 dacdatLeft_w = readdata;
                                 to_dac_left_channel_data_w = dacdatLeft_r;
-                                to_dac_left_channel_valid = 1;
+                                to_dac_left_channel_valid_w = 1;
                             end
-                            //to_dac_right_channel_valid = 0;
                             if (to_dac_right_channel_ready && readdatavalid) begin
+                                read_w = 1;
+                                write_w = 0;
                                 dacdatRight_w = readdata;
                                 to_dac_right_channel_data_w = dacdatRight_r;
-                                to_dac_right_channel_valid = 1;     
+                                to_dac_right_channel_valid_w = 1;
+                                address_w = address_r + 2;
+                                play_counter_w = play_counter_r + 2;     
                             end
-                            address_w = address_r + 2;
-                            play_counter_w = play_counter_r + 2;
                         end
                         REC_SLOW: begin
                             slow_speed_w = control_speed[3:0];
-                            //to_dac_left_channel_valid = 0;
                             if (to_dac_left_channel_ready && readdatavalid) begin
+                                read_w = 1;
+                                write_w = 0;
                                 dacdatLeft_w = readdata;
                                 if (control_interpol == 0) begin
                                     to_dac_left_channel_data_w = dacdatLeft_r;
-                                    to_dac_left_channel_valid = 1;
-                                    slow_counter_w = slow_counter_r + 1;
-                                    if (slow_counter_r == control_speed[3:0]-1) begin
-                                        address_w = address_r + 2;
-                                        play_counter_w = play_counter_r + 2;
-                                    end
+                                    to_dac_left_channel_valid_w = 1;
                                 end
                                 else begin
                                     to_dac_left_channel_data_w = dacdatLeft_prev_r + interpolLeft_r*slow_counter_r;
-                                    to_dac_left_channel_valid = 1;
+                                    to_dac_left_channel_valid_w = 1;
                                     slow_counter_w = slow_counter_r + 1;
-                                    if (slow_counter_r == control_speed[3:0]-1) begin
-                                        dacdatLeft_prev_w = dacdatLeft_r;
-                                        address_w = address_r + 2;
-                                        play_counter_w = play_counter_r + 2;
-                                    end
                                 end
                             end
                             //to_dac_right_channel_valid = 0;
                             if (to_dac_right_channel_ready && readdatavalid) begin
+                                read_w = 1;
+                                write_w = 0;
                                 dacdatRight_w = readdata;
                                 if (control_interpol == 0) begin
                                     to_dac_right_channel_data_w = dacdatRight_prev_r;
-                                    to_dac_right_channel_valid = 1;
+                                    to_dac_right_channel_valid_w = 1;
                                     slow_counter_w = slow_counter_r + 1;
                                     if (slow_counter_r == control_speed[3:0]-1) begin
                                         address_w = address_r + 2;
@@ -256,9 +260,10 @@ module AudioCore(
                                 end
                                 else begin
                                     to_dac_right_channel_data_w = dacdatRight_prev_r+interpolRight_r*slow_counter_r;
-                                    to_dac_right_channel_valid = 1;
+                                    to_dac_right_channel_valid_w = 1;
                                     slow_counter_w = slow_counter_r + 1;
                                     if (slow_counter_r == control_speed[3:0]-1) begin
+                                        dacdatLeft_prev_w = dacdatLeft_r;
                                         dacdatRight_prev_w = dacdatRight_r;
                                         address_w = address_r + 2;
                                         play_counter_w = play_counter_r + 2;
@@ -267,19 +272,19 @@ module AudioCore(
                             end                       
                         end
                         REC_FAST: begin
-                            //to_dac_left_channel_valid = 0;
-                            //to_dac_right_channel_valid = 0;
                             if (to_dac_left_channel_ready && readdatavalid) begin
+                                read_w = 1;
+                                write_w = 0;
                                 dacdatLeft_w = readdata;
                                 to_dac_left_channel_data_w = dacdatLeft_r;
-                                to_dac_left_channel_valid = 1;
-                                address_w = address_r + control_speed<<1;
-                                play_counter_w = play_counter_r + control_speed<<1;
+                                to_dac_left_channel_valid_w = 1;
                             end
                             if (to_dac_right_channel_ready && readdatavalid) begin
+                                read_w = 1;
+                                write_w = 0;
                                 dacdatRight_w = readdata;
                                 to_dac_right_channel_data_w = dacdatRight_r;
-                                to_dac_right_channel_valid = 1;
+                                to_dac_right_channel_valid_w = 1;
                                 address_w = address_r + control_speed<<1;
                                 play_counter_w = play_counter_r + control_speed<<1;
                             end  
