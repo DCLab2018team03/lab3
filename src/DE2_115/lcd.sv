@@ -98,7 +98,7 @@ module LCD(
                     if(busy) busy <= 0;
                     else if(START) begin
                         busy <= 1;
-                        addr <= ADDRESS;
+                        addr <= {1'b1, ADDRESS[6:0]};
                         chr <= CHARACTER;
                         if(ADDRESS == last_addr+1) begin
                             state <= DATA;
