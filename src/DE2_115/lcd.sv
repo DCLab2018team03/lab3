@@ -85,6 +85,7 @@ module LCD(
                             data <= 8'h06; // entry mode set
                             last_state <= IDLE;
                             state <= COMD;
+                            init_idx <= 0;
                         end
                     endcase
                 end
@@ -153,8 +154,9 @@ module LCD(
                 end
                 CLER: begin
                     data <= 8'h01;
-                    en <= 1;
+                    en <= 0;
                     rs <= 0;
+                    state <= WRIT;
                     dly_val <= CLEAR_DLY;
                     state <= WAIT;
                 end
