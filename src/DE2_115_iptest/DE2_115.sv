@@ -189,6 +189,8 @@ module DE2_115 (
 
     assign HEX0 = state[0] ? 7'h7F : 7'h00;
     assign HEX1 = state[1] ? 7'h7F : 7'h00;
+    assign HEX2 = debug ? 7'h7F : 7'h00;
+
 
 	// wire between I2S and AudioCore
 	wire            w_adc_left_ready;
@@ -258,6 +260,7 @@ module DE2_115 (
         .SRAM_LB_N(SRAM_LB_N),
         .record(record),
         .play(play),
-        .state(state)
+        .state(state),
+        .debug(debug)
 	);  
 endmodule

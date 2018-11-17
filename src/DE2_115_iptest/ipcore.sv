@@ -27,8 +27,10 @@ module IPCore(
     output logic        SRAM_UB_N,   // SRAM High-byte Data Mask 
     input  logic record,
     input  logic play,
-    output logic [1:0] state
+    output logic [1:0] state,
+    output logic debug
 );
+logic n_debug;
 
 logic [1:0] n_state;
 localparam IDLE = 2'd0;
@@ -41,24 +43,33 @@ localparam NOT_SELECT = 5'b01000;
 localparam READ       = 5'b10000;
 localparam WRITE      = 5'b00000;
 
-logic [19:0] r_SRAM_DQ;
-assign SRAM_DQ = SRAM_WE_N ? 20'hzzzzz : r_SRAM_DQ;
-assign to_dac_left_channel_data = state==REC ? from_adc_left_channel_data : SRAM_DQ;
-assign to_dac_right_channel_data = state==REC ? from_adc_left_channel_data : SRAM_DQ;
+logic [15:0] r_SRAM_DQ, n_SRAM_DQ;
+assign SRAM_DQ = SRAM_WE_N ? 16'hzzzz : n_SRAM_DQ;
+assign to_dac_left_channel_data = SRAM_DQ;
+assign to_dac_right_channel_data = 16'd0;
 
 
 //audio variable
-logic n_from_adc_left_channel_ready;
+logic n_to_dac_left_channel_valid, n_to_dac_right_channel_valid;
+
+
+logic [19:0] counter, n_counter;
 
 always_ff @(posedge i_clk or posedge i_rst) begin
     if ( i_rst ) begin
         state <= IDLE;
         SRAM_ADDR <= 0;
-        from_adc_left_channel_ready <= 0;
+        counter <= 0;
+        debug <= 0;
+        to_dac_left_channel_valid = 0;
+        to_dac_right_channel_valid = 0;
     end else begin
         state <= n_state;
         SRAM_ADDR <= n_SRAM_ADDR;
-        from_adc_left_channel_ready <= n_from_adc_left_channel_ready;
+        counter <= n_counter;
+        debug <= n_debug;
+        to_dac_left_channel_valid  = n_to_dac_left_channel_valid;
+        to_dac_right_channel_valid = n_to_dac_right_channel_valid;
     end
 end
 
@@ -66,50 +77,56 @@ always_comb begin
 
     n_state = state;
     n_SRAM_ADDR = SRAM_ADDR;
-    n_from_adc_left_channel_ready = from_adc_left_channel_ready;
-    r_SRAM_DQ = 0;
+    from_adc_left_channel_ready = 0;
+    n_SRAM_DQ = 0;
     setSRAMenable(NOT_SELECT);
-    to_dac_left_channel_valid = 1;
-    to_dac_right_channel_valid = 1;
+    n_counter = counter;
+    n_debug = debug;
+    n_to_dac_left_channel_valid = to_dac_left_channel_valid;
+    n_to_dac_right_channel_valid = to_dac_right_channel_valid;
 
     case(state)
         IDLE: begin
             n_SRAM_ADDR = 20'd0;
+            n_debug = 0;
             if ( record ) begin
                 n_state = REC;
+                n_counter = 0;
             end else begin
                 n_state = state;
             end
         end
         REC: begin
+            from_adc_left_channel_ready = 1;
             if ( from_adc_left_channel_valid ) begin
-                n_from_adc_left_channel_ready = 1;
-                r_SRAM_DQ = from_adc_left_channel_data;
-                n_SRAM_ADDR = SRAM_ADDR + 2;
                 setSRAMenable(WRITE);
-            end else begin
-                n_from_adc_left_channel_ready = 0;
+                n_SRAM_DQ = from_adc_left_channel_data;
+                n_SRAM_ADDR = SRAM_ADDR + 1;
             end
             if ( play ) begin
                 n_state = PLAY;
                 n_SRAM_ADDR = 0;
-                r_SRAM_DQ = from_adc_left_channel_data;
-                setSRAMenable(WRITE);
-                n_from_adc_left_channel_ready = 0;
+                n_to_dac_left_channel_valid = 1;
+                n_to_dac_left_channel_valid = 0;
             end else begin
                 n_state = REC;
             end
         end
         PLAY: begin
-            to_dac_left_channel_valid = 1;
-            to_dac_right_channel_valid = 1;
+            setSRAMenable(READ);
             
             //to_dac_left_channel_data = SRAM_DQ;
             //to_dac_right_channel_data = SRAM_DQ;    
             //They are assigned above        
-            
-            n_SRAM_ADDR = SRAM_ADDR + 2;
-            setSRAMenable(READ);
+            if (to_dac_left_channel_ready && to_dac_left_channel_valid) begin
+                n_to_dac_right_channel_valid = 1;
+                n_to_dac_left_channel_valid = 0;
+            end
+            if (to_dac_right_channel_ready && to_dac_right_channel_valid) begin
+                n_to_dac_right_channel_valid = 0;
+                n_to_dac_left_channel_valid = 1;
+                n_SRAM_ADDR = SRAM_ADDR + 1;
+            end
             n_state = state;
         end
         default: n_state = state;
