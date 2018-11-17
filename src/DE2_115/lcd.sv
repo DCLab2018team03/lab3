@@ -110,6 +110,7 @@ module LCD(
                     en <= 0;
                     rs <= 0;
                     last_addr <= ADDRESS;
+                    data <= ADDRESS;
                     state <= WRIT;
                     writ_count <= AS_DLY;
                 end
@@ -117,6 +118,7 @@ module LCD(
                     en <= 0;
                     rs <= 1;
                     last_state <= IDLE;
+                    data <= CHARACTER;
                     state <= WRIT;
                     writ_count <= AS_DLY;
                 end
