@@ -94,18 +94,15 @@ module LCD(
                     endcase
                 end
                 IDLE: begin
-                    if(START) begin
-                        if (!busy) begin
-                            busy <= 1;
-                            addr <= ADDRESS;
-                            chr <= CHARACTER;
+                    if(busy) busy <= 0;
+                    else if(START) begin
+                        addr <= ADDRESS;
+                        chr <= CHARACTER;
+                        if(ADDRESS == last_addr+1) begin
+                            state <= DATA;
                         end else begin
-                            if(addr == last_addr+1) begin
-                                state <= DATA;
-                            end else begin
-                                last_state <= DATA;
-                                state <= COMD;
-                            end
+                            last_state <= DATA;
+                            state <= COMD;
                         end
                     end else if(CLEAR) begin
                         busy <= 1;
