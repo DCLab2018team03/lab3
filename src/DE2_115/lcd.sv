@@ -62,6 +62,7 @@ module LCD(
             writ_idx <= 1'b0;
             clear_idx <= 1'b0;
             writ_count <= 5'b0;
+            data <= 8'h3f;
             en <= 0;
             busy <= 1;
         end else begin
