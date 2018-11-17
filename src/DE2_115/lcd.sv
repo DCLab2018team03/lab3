@@ -96,6 +96,7 @@ module LCD(
                 IDLE: begin
                     if(busy) busy <= 0;
                     else if(START) begin
+                        busy <= 1;
                         addr <= ADDRESS;
                         chr <= CHARACTER;
                         if(ADDRESS == last_addr+1) begin
