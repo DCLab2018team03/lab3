@@ -18,7 +18,7 @@ module LCD(
 
     logic [2:0]  state, last_state;
     logic [7:0]  last_addr;
-    logic [19:0] dly_val;
+    logic [20:0] dly_val;
     logic [1:0]  init_idx;
     logic [1:0]  writ_idx;
     logic [4:0]  writ_count;
@@ -27,11 +27,11 @@ module LCD(
     logic        en;
     logic        busy;
 
-    parameter BOOT_DLY  = 20'hea600; // 19.2ms
-    parameter CLEAR_DLY = 20'h12ad4; // 1.53ms
-    parameter WRITE_DLY = 20'h866;   // 43us
-    parameter AS_DLY    = 5'h3;      // 40ns
-    parameter EN_DLY    = 5'h10;     // 230ns
+    parameter BOOT_DLY  = 21'h16e360; // 19.2ms
+    parameter CLEAR_DLY = 21'h13880; // 1.53ms
+    parameter WRITE_DLY = 21'h55f0;   // 43us
+    parameter AS_DLY    = 5'h4;      // 40ns
+    parameter EN_DLY    = 5'h1f;     // 230ns
 
     parameter INIT = 3'h0;
     parameter IDLE = 3'h1;
