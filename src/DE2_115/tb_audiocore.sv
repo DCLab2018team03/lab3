@@ -35,13 +35,13 @@ module tb;
     logic    [15:0]  w_event_hold;
 	logic    [63:0]  w_time;
 
-    Recorder recorder(
+    AudioCore recorder(
 		.i_clk(clk),
 		.i_rst(rst),
 		// Input
-		.i_input_event(w_input_event),
+		.i_event(w_input_event),
         // Output
-		.o_event_hold(w_event_hold),
+		.o_stop_signal(),
 		.o_time(w_time),
         // avalon_audio_slave
         // avalon_left_channel_source
@@ -84,7 +84,7 @@ module tb;
         w_adc_left_data = 16'h4F;
         @(posedge clk);
         w_adc_left_data = 16'h29;
-        @(posedge clk);
+        @(negedge clk);
         w_adc_left_valid = 0;
         @(posedge clk);
         @(posedge clk);
@@ -100,7 +100,7 @@ module tb;
         w_adc_left_valid = 1;
         w_adc_left_data = 16'h66;
         @(posedge clk);
-        from_adc_left_channel_valid = 0;
+        w_adc_left_valid = 0;
         @(posedge clk);
         @(posedge clk);
         w_input_event = {REC_STOP, 12'd0};
@@ -111,7 +111,15 @@ module tb;
         @(posedge clk);
         @(posedge clk);
         w_readdatavalid = 1;
-        w_readdata = 16'h66;       
+        w_readdata = 16'h66;
+        @(posedge clk);
+        @(posedge clk);
+        @(posedge clk);
+        w_readdatavalid = 1;
+        w_readdata = 16'h65;
+        @(posedge clk);
+        w_readdatavalid = 1;
+        w_readdata = 16'h36;       
         @(posedge clk);
         @(posedge clk);
         w_readdatavalid = 1;
