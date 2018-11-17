@@ -31,7 +31,8 @@ module AudioCore(
     output logic        SRAM_CE_N,   // SRAM Chip Enable
     output logic        SRAM_OE_N,   // SRAM Output Enable
     output logic        SRAM_LB_N,   // SRAM Low-byte Data Mask 
-    output logic        SRAM_UB_N   // SRAM High-byte Data Mask   
+    output logic        SRAM_UB_N,   // SRAM High-byte Data Mask
+    output logic [2:0]  stat
 );
 
     logic [3:0] control_code;  // 1:play, 2:pause, 3:stop, 4:record
@@ -50,7 +51,7 @@ module AudioCore(
     localparam RECORD_PAUSE = 4;
     localparam WRITE_DATALENGTH_BEFORE_STOP = 5;
     localparam WRITE_DATALENGTH_BEFORE_PAUSE = 6;
-
+    
     logic [2:0] state, n_state;
     logic [15:0] dacdatLeft_prev_r, dacdatLeft_prev_w;
     logic [15:0] dacdatRight_prev_r, dacdatRight_prev_w;
@@ -72,7 +73,9 @@ module AudioCore(
     localparam SRAM_WRITE      = 5'b00000;
     assign SRAM_ADDR = address_r;
     assign SRAM_DQ = SRAM_WE_N ? 16'hzzzz : n_SRAM_DQ;
-
+    
+    assign stat = state;
+    
     AudioCoreInterpolation interpolLeft(
         .i_data_prev(dacdatLeft_prev_r),
         .i_data(SRAM_DQ),
