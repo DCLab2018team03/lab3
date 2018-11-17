@@ -17,7 +17,7 @@ module LCD(
 );
 
     logic [2:0]  state, last_state;
-    logic [7:0]  last_addr;
+    logic [7:0]  last_addr, addr, chr;
     logic [20:0] dly_val;
     logic [1:0]  init_idx;
     logic        writ_idx;
@@ -55,6 +55,8 @@ module LCD(
             state <= WAIT;
             last_state <= INIT;
             last_addr <= 0;
+            addr <= 0;
+            chr <= 0;
             dly_val <= BOOT_DLY;
             init_idx <= 2'b0;
             writ_idx <= 1'b0;
@@ -67,13 +69,13 @@ module LCD(
                 INIT: begin
                     case(init_idx)
                         0: begin
-                            data <= 8'h38; // function set
+                            addr <= 8'h38; // function set
                             last_state <= INIT;
                             state <= COMD;
                             init_idx <= 1;
                         end
                         1: begin
-                            data <= 8'h0C; // disp on
+                            addr <= 8'h0C; // disp on
                             last_state <= INIT;
                             state <= COMD;
                             init_idx <= 2;
@@ -84,7 +86,7 @@ module LCD(
                             init_idx <= 3;
                         end
                         3: begin
-                            data <= 8'h06; // entry mode set
+                            addr <= 8'h06; // entry mode set
                             last_state <= IDLE;
                             state <= COMD;
                             init_idx <= 0;
@@ -93,12 +95,17 @@ module LCD(
                 end
                 IDLE: begin
                     if(START) begin
-                        busy <= 1;
-                        if(ADDRESS == last_addr+1) begin
-                            state <= DATA;
+                        if (!busy) begin
+                            busy <= 1;
+                            addr <= ADDRESS;
+                            chr <= CHARACTER;
                         end else begin
-                            last_state <= DATA;
-                            state <= COMD;
+                            if(addr == last_addr+1) begin
+                                state <= DATA;
+                            end else begin
+                                last_state <= DATA;
+                                state <= COMD;
+                            end
                         end
                     end else if(CLEAR) begin
                         busy <= 1;
@@ -112,8 +119,8 @@ module LCD(
                 COMD: begin
                     en <= 0;
                     rs <= 0;
-                    last_addr <= ADDRESS;
-                    data <= ADDRESS;
+                    last_addr <= addr;
+                    data <= addr;
                     state <= WRIT;
                     writ_count <= AS_DLY;
                 end
@@ -121,7 +128,7 @@ module LCD(
                     en <= 0;
                     rs <= 1;
                     last_state <= IDLE;
-                    data <= CHARACTER;
+                    data <= chr;
                     state <= WRIT;
                     writ_count <= AS_DLY;
                 end
@@ -157,7 +164,7 @@ module LCD(
                 CLER: begin
                     case(clear_idx)
                         0: begin
-                            data <= 8'h01;
+                            addr <= 8'h01;
                             en <= 0;
                             rs <= 0;
                             clear_idx <= 1;
