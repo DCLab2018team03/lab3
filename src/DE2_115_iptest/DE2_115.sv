@@ -181,8 +181,15 @@ module DE2_115 (
 );
    
      // Main Module
-    wire rst_main;
+    wire rst_main, record, play;
+    logic [1:0] state;
     assign rst_main = SW[17];
+    assign start = SW[16];
+    assign play = SW[15];
+
+    assign HEX0 = state[0] ? 7'h7F : 7'h00;
+    assign HEX1 = state[1] ? 7'h7F : 7'h00;
+
 	// wire between I2S and AudioCore
 	wire            w_adc_left_ready;
 	wire    [15:0]  w_adc_left_data;
@@ -221,7 +228,7 @@ module DE2_115 (
 		.to_dac_right_channel_ready   (w_dac_right_ready)
     );
 	// Recorder
-	ipcore core(
+	IPCore core(
 		.i_clk(CLOCK_50),
 		.i_rst(rst_main),
         // avalon_audio_slave
@@ -240,6 +247,16 @@ module DE2_115 (
         // avalon_left_channel_sink
         .to_dac_right_channel_data(w_dac_right_data),
         .to_dac_right_channel_valid(w_dac_right_valid),
-        .to_dac_right_channel_ready(w_dac_right_ready)
+        .to_dac_right_channel_ready(w_dac_right_ready),
+        .SRAM_DQ(SRAM_DQ),
+        .SRAM_ADDR(SRAM_ADDR),
+        .SRAM_OE_N(SRAM_OE_N),
+        .SRAM_WE_N(SRAM_WE_N),
+        .SRAM_CE_N(SRAM_CE_N),
+        .SRAM_UB_N(SRAM_UB_N),
+        .SRAM_LB_N(SRAM_LB_N),
+        .record(record),
+        .play(play),
+        .state(state)
 	);  
 endmodule
