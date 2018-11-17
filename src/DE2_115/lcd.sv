@@ -172,6 +172,7 @@ module LCD(
                         1: begin
                             dly_val <= CLEAR_DLY;
                             state <= WAIT;
+                            last_state <= INIT;
                             clear_idx <= 0;
                         end
                     endcase
