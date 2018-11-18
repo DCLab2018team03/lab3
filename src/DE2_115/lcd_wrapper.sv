@@ -18,6 +18,7 @@ module LCD_wrapper(
     parameter CLEAR_LCD  = 2'd2;
 
     logic [3:0] control_code, curr_code;
+    logic [15:0] curr_status;
     logic [1:0] control_mode;
     logic [3:0] control_speed;
     logic       control_interpol;
@@ -29,18 +30,15 @@ module LCD_wrapper(
     logic [2:0] sec_ten;
     logic [4:0] min;
 
-    assign control_code     = STATUS[15:12];
-    assign control_mode     = STATUS[11:10];
-    assign control_speed    = STATUS[9:6];
-    assign control_interpol = STATUS[5];
+    assign control_code     = curr_status[15:12];
+    assign control_mode     = curr_status[11:10];
+    assign control_speed    = curr_status[9:6];
+    assign control_interpol = curr_status[5];
 
     always_ff @(posedge i_clk or posedge i_rst) begin
         if ( i_rst ) begin
-            control_code <= REC_NONE;
             curr_code <= REC_NONE;
-            control_mode <= REC_NORMAL;
-            control_speed <= 1;
-            control_interpol <= 0;
+            curr_status <= STATUS;
             state <= CLEAR_LCD;
             address <= 8'h00;
             line <= 1'b0;
@@ -346,53 +344,19 @@ module LCD_wrapper(
                     end
                     CLEAR_LCD: begin
                         if(!BUSY) begin
-                            START <= 1;
-                            case(address)
-                                8'h00: begin
-                                    ADDRESS <= 8'h00;
-                                    CHARACTER <= 8'h49; // I
-                                    address <= 8'h01;
-                                end
-                                8'h01: begin
-                                    ADDRESS <= 8'h01;
-                                    CHARACTER <= 8'h64; // d
-                                    address <= 8'h02;
-                                end
-                                8'h02: begin
-                                    ADDRESS <= 8'h02;
-                                    CHARACTER <= 8'h6c; // l
-                                    address <= 8'h03;
-                                end
-                                8'h03: begin
-                                    ADDRESS <= 8'h03;
-                                    CHARACTER <= 8'h65; // e
-                                    address <= 8'h04;
-                                end
-                                8'h04: begin
-                                    ADDRESS <= 8'h04;
-                                    CHARACTER <= 8'h2e; // .
-                                    address <= 8'h05;
-                                end
-                                8'h05: begin
-                                    ADDRESS <= 8'h05;
-                                    CHARACTER <= 8'h2e; // .
-                                    address <= 8'h06;
-                                end
-                                8'h06: begin
-                                    ADDRESS <= 8'h06;
-                                    CHARACTER <= 8'h2e; // .
-                                    address <= 8'h40;
-                                    line <= 1'b1;
-                                    state <= WRITE;
-                                end
-                                default: begin
-                                    address <= 8'h0;
-                                end
-                            endcase
+                            START <= 0;
+                            CLEAR <= 1;
+                            address <= 8'h0;
+                            line <= 1'b0;
+                            state <= WRITE;
                         end
                     end
                     REST: begin
                         START <= 0;
+                        if(STATUS != curr_status) begin
+                            curr_status <= STATUS;
+                            state <= CLEAR_LCD;
+                        end
                     end
                 endcase
             end
