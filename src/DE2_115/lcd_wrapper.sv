@@ -96,7 +96,7 @@ module LCD_wrapper(
                                                 address <= 8'h06;
                                             end
                                             8'h06: begin
-                                                ADDRESS <= 8'h04;
+                                                ADDRESS <= 8'h06;
                                                 CHARACTER <= 8'h2e; //.
                                                 address <= 8'h40;
                                                 line <= 1'b1;
@@ -386,6 +386,8 @@ module LCD_wrapper(
                         curr_status <= STATUS;
                         state <= CLEAR_LCD;
                     end else begin
+                        address <= 8'h0;
+                        line <= 1'b0;
                         state <= WRITE;
                     end
                 end
