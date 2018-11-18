@@ -33,8 +33,7 @@ module TimeCore(
 
 
     logic [3:0] control_code;
-    logic [1:0] control_mode;
-    logic [3:0] control_speed;
+    logic [5:0] control_mode_and_speed;
     logic       control_interpol;
 
     assign control_code               = i_input_event[15:12];
@@ -67,6 +66,7 @@ module TimeCore(
             play_sec_1 <= 0;
             play_sec_0 <= 0;
             sub_increment <= 0;
+            clk_counter <= 0;
             state <= IDLE;
         end else begin
             rec_min_1  <= n_rec_min_1;
@@ -77,6 +77,7 @@ module TimeCore(
             play_min_0 <= n_play_min_0;
             play_sec_1 <= n_play_sec_1;
             play_sec_0 <= n_play_sec_0;
+            clk_counter <= n_clk_counter;
             sub_increment = n_sub_increment;
             state <= n_state;
         end
@@ -85,12 +86,12 @@ module TimeCore(
     always_comb begin
         n_state = state;
         n_clk_counter = clk_counter;
-        case(control_code) begin
+        case(control_code)
             REC_RECORD: n_state = RECORD;
             REC_PAUSE : n_state = PAUSE;
             REC_STOP  : n_state = STOP;
             REC_PLAY  : n_state = PLAY;
-        end
+        endcase
 
         n_rec_min_1  = rec_min_1; 
         n_rec_min_0  = rec_min_0; 
@@ -173,7 +174,7 @@ module TimeCore(
             RECORD: begin
                 if ( clk_counter == 26'd50000000 ) begin
                     n_clk_counter = 0;
-                    n_rec_sec0 = rec_sec0 + 1;
+                    n_rec_sec_0 = rec_sec_0 + 1;
                 end
                 else begin
                     n_clk_counter = clk_counter + 1;
@@ -196,7 +197,7 @@ module TimeCore(
             PLAY: begin
                 if ( clk_counter >= 26'd50000000 ) begin
                     n_clk_counter = 0;
-                    n_play_sec0 = play_sec0 + 1;
+                    n_play_sec_0 = play_sec_0 + 1;
                 end
                 else begin
                     n_clk_counter = clk_counter + increment;
@@ -204,3 +205,4 @@ module TimeCore(
             end
         endcase
     end
+endmodule
