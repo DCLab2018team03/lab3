@@ -14,7 +14,7 @@ module InputController(
     output logic [15:0]  o_input_event,      // 4code,2speed,4param,1inter,5reserved
     
     // AudioCore stop signal
-    input i_stop_signal,
+    input i_stop_signal
 );
 
     logic play_bit, pause_bit, stop_bit, record_bit;
@@ -36,7 +36,6 @@ module InputController(
     localparam PLAY   = 4'b1000;
     localparam PAUSE  = 4'b0100;
     localparam STOP   = 4'b0010;
-    localparam i_STOP = 4'b0000;
     localparam RECORD = 4'b0001;
 
     localparam SLOW   = 2'b01;
@@ -53,13 +52,15 @@ module InputController(
 			control_speed <= 0;
 			control_interpol <= 0;
         end else begin
-            case(mode | ~i_stop_signal)
+            case(mode)
                 PLAY: if (control_code != REC_RECORD) control_code <= REC_PLAY;
                 PAUSE: if (control_code != REC_STOP) control_code <= REC_PAUSE;
                 STOP: control_code <= REC_STOP;
-                i_STOP: control_code <= REC_STOP;
                 RECORD: if (control_code != REC_PLAY) control_code <= REC_RECORD;
-                default: control_code <= control_code;
+                default: begin
+                    if (i_stop_signal) control_code <= REC_STOP;
+                    else control_code <= control_code;
+                end
             endcase
             case (i_sw_speed[1:0])
                 SLOW: control_mode <= REC_SLOW;

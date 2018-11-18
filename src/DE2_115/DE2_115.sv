@@ -219,19 +219,8 @@ module DE2_115 (
 	wire            w_dac_right_ready;
 	wire    [15:0]  w_dac_right_data;
 	wire            w_dac_right_valid;
-    // wire between AudioCore and SRAM
-    wire    [19:0]  w_address;
-    wire            w_read;
-    wire            w_write;
-    wire    [15:0]  w_writedata;
-    wire    [15:0]  w_readdata;
-    wire            w_readdatavalid;
-
-    wire    [15:0]  w_input_event;
-    wire    [15:0]  w_event_hold;
-	wire    [63:0]  w_time;
-
-    logic [2:0] stat;
+	wire    [15:0]  w_input_event;
+    logic           w_stop_signal, n_stop_signal;
     
     // tb
     always_comb begin
@@ -249,28 +238,18 @@ module DE2_115 (
             4'd3: HEX1 = 7'h7F;
             4'd4: HEX0 = 7'h7F;
         endcase
-        case(stat)
-            3'd0: begin
-                HEX4 = 7'h7F;
-            end
-            3'd1: begin
-                HEX5 = 7'h7F;
-            end
-            3'd2: begin
-                HEX4 = 7'h7F;
-                HEX5 = 7'h7F;
-            end
-            3'd3: begin
-                HEX6 = 7'h7F;
-            end
-            3'd4: begin
-                HEX6 = 7'h7F;
-                HEX4 = 7'h7F;
-            end
+        case (w_input_event[11:10])
+            2'b00: HEX4 = 7'h7F;
+            2'b01: HEX5 = 7'h7F;
+            2'b10: HEX6 = 7'h7F;
         endcase
+        if(w_stop_signal) LEDG[0] = 1;
+        else LEDG[0] = 0;
     end
     
-
+    always_ff @(posedge CLOCK_50) begin
+        w_stop_signal <= n_stop_signal;
+    end
 
     Total total(
         .audio_0_external_interface_ADCDAT(AUD_ADCDAT),   // audio_0_external_interface.ADCDAT
@@ -306,17 +285,15 @@ module DE2_115 (
         .i_btn_record(KEY[0]),
         .i_sw_speed(SW[8:0]),
         .i_sw_interpol(SW[9]),
-        .o_input_event(w_input_event)
+        .o_input_event(w_input_event),
+        .i_stop_signal(w_stop_signal)
     );
 	// Recorder
-	Recorder recorder(
+	AudioCore recorder(
 		.i_clk(CLOCK_50),
 		.i_rst(rst_main),
 		// Input
-		.i_input_event(w_input_event),
-        // Output
-		.o_event_hold(w_event_hold),
-		.o_time(w_time),
+		.i_event(w_input_event),
         // avalon_audio_slave
         // avalon_left_channel_source
 		.from_adc_left_channel_ready(w_adc_left_ready),
@@ -342,6 +319,54 @@ module DE2_115 (
         .SRAM_OE_N(SRAM_OE_N),
         .SRAM_LB_N(SRAM_LB_N),
         .SRAM_UB_N(SRAM_UB_N),
-        .stat(stat)
-	);  
+        .o_stop_signal(n_stop_signal)
+	);
+    // LCD
+    wire [7:0] w_character;
+    wire [7:0] w_address;
+    wire w_start;
+    wire w_clear;
+    wire w_busy;
+    LCD lcd(
+	.LCD_DATA(LCD_DATA),
+	.LCD_RS(LCD_RS),
+	.LCD_EN(LCD_EN),
+	.LCD_ON(LCD_ON),
+	.LCD_RW(LCD_RW),
+	.LCD_BLON(LCD_BLON),
+
+	.BUSY(w_busy),
+	.START(w_start),
+	.CLEAR(w_clear),
+
+	.CHARACTER(w_character),
+	.ADDRESS(w_address),
+	.i_rst(rst_main),
+	.i_clk(CLOCK_50)
+    );
+
+    wire [15:0] w_record_time;
+    wire [15:0] w_play_time;
+    LCD_wrapper wrapper( 
+        .CHARACTER(w_character),
+	    .ADDRESS(w_address),
+	    .START(w_start),
+	    .CLEAR(w_clear),
+	    .BUSY(w_busy),
+
+	    .i_clk(CLOCK_50),
+	    .i_rst(rst_main),
+	    .STATUS(w_input_event),
+
+        .PLAY_TIME(w_play_time),
+        .TOT_TIME(w_record_time)
+    );
+    // time core
+    TimeCore timeCore(
+        .i_clk(CLOCK_50),
+        .i_rst(rst_main),
+        .i_input_event(w_input_event),
+        .o_record_time(w_record_time),
+        .o_play_time(w_play_time)
+    );      
 endmodule
