@@ -39,10 +39,16 @@ module InputController(
 			control_interpol <= 0;
         end else begin
             case(mode)
-                4'b1000: control_code <= REC_PLAY;
+                4'b1000: begin
+                    if (control_code != REC_RECORD)
+                        control_code <= REC_PLAY;
+                end
                 4'b0100: control_code <= REC_PAUSE;
                 4'b0010: control_code <= REC_STOP;
-                4'b0001: control_code <= REC_RECORD;
+                4'b0001: begin 
+                    if (control_code != REC_PLAY)
+                        control_code <= REC_RECORD;
+                end
                 default: control_code <= control_code;
             endcase
             case (i_sw_speed[1:0])

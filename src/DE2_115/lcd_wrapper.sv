@@ -11,7 +11,9 @@ module LCD_wrapper(
 	input i_clk,
 	input i_rst,
 	input [15:0] STATUS,
-	input [63:0] TIME
+	input [63:0] TIME,
+	
+	output [1:0] stat
 );
     parameter REST   = 2'd0;
     parameter WRITE   = 2'd1;
@@ -30,6 +32,8 @@ module LCD_wrapper(
     logic [2:0] sec_ten;
     logic [4:0] min;
 
+	 assign stat = state;
+	 
     assign control_code     = curr_status[15:12];
     assign control_mode     = curr_status[11:10];
     assign control_speed    = curr_status[9:6];
@@ -54,7 +58,7 @@ module LCD_wrapper(
                 sec_one <= 4'b0;
                 min <= 5'b0;
                 curr_code <= control_code;
-                state <= WRITE;
+                //state <= WRITE;
             end else begin
                 if(clk_count == 26'd50000000) begin
                     if(sec_one == 4'd9) begin
@@ -75,6 +79,7 @@ module LCD_wrapper(
                     WRITE: begin
                         if(!BUSY) begin
                             START <= 1;
+									 CLEAR <= 0;
                             case(line)
                                 1'b0: begin
                                     case(control_code)
@@ -82,7 +87,7 @@ module LCD_wrapper(
                                             case(address)
                                                 8'h00: begin
                                                     ADDRESS <= 8'h00;
-                                                    CHARACTER <= 8'h19; //I
+                                                    CHARACTER <= 8'h49; //I
                                                     address <= 8'h01;
                                                 end
                                                 8'h01: begin
@@ -299,11 +304,14 @@ module LCD_wrapper(
                                                     ADDRESS <= 8'h40;
                                                     address <= 8'h41;
                                                 end
-                                                default: begin
+                                                REC_FAST: begin
                                                     CHARACTER <= 8'h2a; // *
                                                     ADDRESS <= 8'h40;
                                                     address <= 8'h41;
                                                 end
+												REC_NORMAL: begin
+													address <= 8'h43;
+												end
                                             endcase
                                         end
                                         8'h41: begin
@@ -353,6 +361,7 @@ module LCD_wrapper(
                     end
                     REST: begin
                         START <= 0;
+								CLEAR <= 0;
                         if(STATUS != curr_status) begin
                             curr_status <= STATUS;
                             state <= CLEAR_LCD;
@@ -361,6 +370,5 @@ module LCD_wrapper(
                 endcase
             end
         end
-    end
-
+	end
 endmodule

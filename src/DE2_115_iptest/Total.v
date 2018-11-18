@@ -25,22 +25,22 @@ module Total (
 		output wire        audio_and_video_config_0_external_interface_SCLK, //                                            .SCLK
 		output wire        audio_pll_0_audio_clk_clk,                        //                       audio_pll_0_audio_clk.clk
 		input  wire        clk_clk,                                          //                                         clk.clk
-		input  wire [21:0] new_sdram_controller_0_s1_address,                //                   new_sdram_controller_0_s1.address
-		input  wire [1:0]  new_sdram_controller_0_s1_byteenable_n,           //                                            .byteenable_n
+		input  wire [22:0] new_sdram_controller_0_s1_address,                //                   new_sdram_controller_0_s1.address
+		input  wire [3:0]  new_sdram_controller_0_s1_byteenable_n,           //                                            .byteenable_n
 		input  wire        new_sdram_controller_0_s1_chipselect,             //                                            .chipselect
-		input  wire [15:0] new_sdram_controller_0_s1_writedata,              //                                            .writedata
+		input  wire [31:0] new_sdram_controller_0_s1_writedata,              //                                            .writedata
 		input  wire        new_sdram_controller_0_s1_read_n,                 //                                            .read_n
 		input  wire        new_sdram_controller_0_s1_write_n,                //                                            .write_n
-		output wire [15:0] new_sdram_controller_0_s1_readdata,               //                                            .readdata
+		output wire [31:0] new_sdram_controller_0_s1_readdata,               //                                            .readdata
 		output wire        new_sdram_controller_0_s1_readdatavalid,          //                                            .readdatavalid
 		output wire        new_sdram_controller_0_s1_waitrequest,            //                                            .waitrequest
-		output wire [11:0] new_sdram_controller_0_wire_addr,                 //                 new_sdram_controller_0_wire.addr
+		output wire [12:0] new_sdram_controller_0_wire_addr,                 //                 new_sdram_controller_0_wire.addr
 		output wire [1:0]  new_sdram_controller_0_wire_ba,                   //                                            .ba
 		output wire        new_sdram_controller_0_wire_cas_n,                //                                            .cas_n
 		output wire        new_sdram_controller_0_wire_cke,                  //                                            .cke
 		output wire        new_sdram_controller_0_wire_cs_n,                 //                                            .cs_n
-		inout  wire [15:0] new_sdram_controller_0_wire_dq,                   //                                            .dq
-		output wire [1:0]  new_sdram_controller_0_wire_dqm,                  //                                            .dqm
+		inout  wire [31:0] new_sdram_controller_0_wire_dq,                   //                                            .dq
+		output wire [3:0]  new_sdram_controller_0_wire_dqm,                  //                                            .dqm
 		output wire        new_sdram_controller_0_wire_ras_n,                //                                            .ras_n
 		output wire        new_sdram_controller_0_wire_we_n,                 //                                            .we_n
 		input  wire        reset_reset_n,                                    //                                       reset.reset_n
