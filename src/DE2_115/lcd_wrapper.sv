@@ -37,10 +37,10 @@ module LCD_wrapper(
     assign control_mode     = curr_status[11:10];
     assign control_speed    = curr_status[9:6];
     assign control_interpol = curr_status[5];
-    assign play_min_ten     = PLAY_TIME[31:28];
-    assign play_min_one     = PLAY_TIME[27:24];
-    assign play_sec_ten     = PLAY_TIME[23:20];
-    assign play_sec_one     = PLAY_TIME[19:16];
+    assign play_min_ten     = PLAY_TIME[15:12];
+    assign play_min_one     = PLAY_TIME[11:8];
+    assign play_sec_ten     = PLAY_TIME[7:4];
+    assign play_sec_one     = PLAY_TIME[3:0];
     assign tot_min_ten      = TOT_TIME[15:12];
     assign tot_min_one      = TOT_TIME[11:8];
     assign tot_sec_ten      = TOT_TIME[7:4];
@@ -382,8 +382,12 @@ module LCD_wrapper(
                 REST: begin
                     START <= 0;
 					CLEAR <= 0;
-                    curr_status <= STATUS;
-                    state <= CLEAR_LCD;
+                    if(curr_status != STATUS) begin
+                        curr_status <= STATUS;
+                        state <= CLEAR_LCD;
+                    end else begin
+                        state <= WRITE;
+                    end
                 end
             endcase
         end
