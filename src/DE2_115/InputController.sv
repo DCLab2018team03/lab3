@@ -11,7 +11,10 @@ module InputController(
     input   [8:0]   i_sw_speed,
     input           i_sw_interpol,
     // Recorder Core
-    output logic [15:0]  o_input_event       // 4code,2speed,4param,1inter,5reserved
+    output logic [15:0]  o_input_event,      // 4code,2speed,4param,1inter,5reserved
+    
+    // AudioCore stop signal
+    input i_stop_signal,
 );
 
     logic play_bit, pause_bit, stop_bit, record_bit;
@@ -24,10 +27,22 @@ module InputController(
 
     logic [3:0] mode;
     assign mode = {play_bit, pause_bit, stop_bit, record_bit};
+    // control information
     logic [3:0] control_code;
     logic [1:0] control_mode;
     logic [3:0] control_speed;
     logic       control_interpol;
+
+    localparam PLAY   = 4'b1000;
+    localparam PAUSE  = 4'b0100;
+    localparam STOP   = 4'b0010;
+    localparam i_STOP = 4'b0000;
+    localparam RECORD = 4'b0001;
+
+    localparam SLOW   = 2'b01;
+    localparam FAST   = 2'b10;
+    
+
 
     assign o_input_event = {control_code, control_mode, control_speed, control_interpol, 5'd0};
 
@@ -38,22 +53,17 @@ module InputController(
 			control_speed <= 0;
 			control_interpol <= 0;
         end else begin
-            case(mode)
-                4'b1000: begin
-                    if (control_code != REC_RECORD)
-                        control_code <= REC_PLAY;
-                end
-                4'b0100: control_code <= REC_PAUSE;
-                4'b0010: control_code <= REC_STOP;
-                4'b0001: begin 
-                    if (control_code != REC_PLAY)
-                        control_code <= REC_RECORD;
-                end
+            case(mode | ~i_stop_signal)
+                PLAY: if (control_code != REC_RECORD) control_code <= REC_PLAY;
+                PAUSE: if (control_code != REC_STOP) control_code <= REC_PAUSE;
+                STOP: control_code <= REC_STOP;
+                i_STOP: control_code <= REC_STOP;
+                RECORD: if (control_code != REC_PLAY) control_code <= REC_RECORD;
                 default: control_code <= control_code;
             endcase
             case (i_sw_speed[1:0])
-                2'b01: control_mode <= REC_SLOW;
-                2'b10: control_mode <= REC_FAST;
+                SLOW: control_mode <= REC_SLOW;
+                FAST: control_mode <= REC_FAST;
                 default: control_mode <= REC_NORMAL;
             endcase
             case(i_sw_speed[8:2])
