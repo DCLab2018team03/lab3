@@ -57,7 +57,7 @@ module AudioCore(
     logic [15:0] SRAM_DQ_prev, n_SRAM_DQ_prev;
     logic [3:0] slow_counter_r, slow_counter_w;
     logic [31:0] play_counter_r, play_counter_w;
-    logic [15:0] interpolayion_r, interpolation_w;
+    logic [15:0] interpolation_r, interpolation_w;
     logic [31:0] data_length_r, data_length_w;
     logic writedatalength_counter_w, writedatalength_counter_r;
     logic [15:0] n_to_dac_left_channel_data, n_to_dac_right_channel_data;
@@ -80,7 +80,7 @@ module AudioCore(
         .i_data_prev(SRAM_DQ_prev),
         .i_data(SRAM_DQ),
         .i_divisor(control_speed),
-        .o_quotient(interpolation)
+        .o_quotient(interpolation_w)
     );
     
     always_ff @(posedge i_clk or posedge i_rst) begin
@@ -141,8 +141,6 @@ module AudioCore(
                         n_SRAM_ADDR = 0;
                         slow_counter_w = 0;
                         play_counter_w = 0;
-                        n_to_dac_left_channel_valid = 1;
-                        n_to_dac_right_channel_valid = 0;
                     end
                     REC_RECORD: begin
                         n_state = RECORD;
@@ -161,6 +159,8 @@ module AudioCore(
                     data_length_w[15:0] = SRAM_DQ;
                     n_SRAM_ADDR = 2;
                     n_state = PLAY;
+                    n_to_dac_left_channel_valid = 1;
+                    n_to_dac_right_channel_valid = 0;
                 end
             end
             PLAY: begin
@@ -245,7 +245,11 @@ module AudioCore(
             end
             PLAY_PAUSE: begin
                 case (control_code)
-                    REC_PLAY: n_state = PLAY;
+                    REC_PLAY: begin
+                        n_state = PLAY;
+                        n_to_dac_left_channel_valid = 1;
+                        n_to_dac_right_channel_valid = 0;
+                    end
                     REC_STOP: n_state = IDLE;
                     REC_RECORD: begin
                         n_state = RECORD;
