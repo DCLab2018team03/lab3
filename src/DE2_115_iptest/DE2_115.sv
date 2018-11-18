@@ -19,14 +19,14 @@ module DE2_115 (
     input  [17:0] SW,          // Toggle Switch[17:0]
 
     // 7-SEG Display
-    output [6:0]  HEX0,        // Seven Segment Digit 0
-    output [6:0]  HEX1,        // Seven Segment Digit 1
-    output [6:0]  HEX2,        // Seven Segment Digit 2
-    output [6:0]  HEX3,        // Seven Segment Digit 3
-    output [6:0]  HEX4,        // Seven Segment Digit 4
-    output [6:0]  HEX5,        // Seven Segment Digit 5
-    output [6:0]  HEX6,        // Seven Segment Digit 6
-    output [6:0]  HEX7,        // Seven Segment Digit 7
+    output logic [6:0]  HEX0,        // Seven Segment Digit 0
+    output logic [6:0]  HEX1,        // Seven Segment Digit 1
+    output logic [6:0]  HEX2,        // Seven Segment Digit 2
+    output logic [6:0]  HEX3,        // Seven Segment Digit 3
+    output logic [6:0]  HEX4,        // Seven Segment Digit 4
+    output logic [6:0]  HEX5,        // Seven Segment Digit 5
+    output logic [6:0]  HEX6,        // Seven Segment Digit 6
+    output logic [6:0]  HEX7,        // Seven Segment Digit 7
 
     // LED
     output [8:0]  LEDG,        // LED Green[8:0]
@@ -182,14 +182,28 @@ module DE2_115 (
    
      // Main Module
     wire rst_main, record, play;
-    logic [1:0] state;
+    logic [2:0] state;
     assign rst_main = SW[17];
     assign record = SW[16];
     assign play = SW[15];
 
-    assign HEX0 = state[0] ? 7'h7F : 7'h00;
-    assign HEX1 = state[1] ? 7'h7F : 7'h00;
-    assign HEX2 = debug ? 7'h7F : 7'h00;
+    always_comb begin
+        HEX0 = 7'h00;
+        HEX1 = 7'h00;
+        HEX2 = 7'h00;
+        HEX3 = 7'h00;
+        HEX4 = 7'h00;
+        HEX5 = 7'h00;
+        HEX6 = 7'h00;
+        HEX7 = 7'h00;
+        case (state)
+            3'd00: HEX0 = 7'h7F;
+            3'd01: HEX1 = 7'h7F;
+            3'd02: HEX2 = 7'h7F;
+            3'd03: HEX3 = 7'h7F;
+            3'd04: HEX4 = 7'h7F;
+        endcase
+    end
 
 
 	// wire between I2S and AudioCore
@@ -205,6 +219,16 @@ module DE2_115 (
 	wire            w_dac_right_ready;
 	wire    [15:0]  w_dac_right_data;
 	wire            w_dac_right_valid;
+
+    wire    [22:0]  new_sdram_controller_0_s1_address;
+    wire    [3:0]   new_sdram_controller_0_s1_byteenable_n;
+    wire            new_sdram_controller_0_s1_chipselect;
+    wire    [31:0]  new_sdram_controller_0_s1_writedata;
+    wire            new_sdram_controller_0_s1_read_n;
+    wire            new_sdram_controller_0_s1_write_n;
+    wire    [31:0]  new_sdram_controller_0_s1_readdata;
+    wire            new_sdram_controller_0_s1_readdatavalid;
+    wire            new_sdram_controller_0_s1_waitrequest;
 
     Total total(
         .audio_0_external_interface_ADCDAT(AUD_ADCDAT),   // audio_0_external_interface.ADCDAT
@@ -228,8 +252,28 @@ module DE2_115 (
 		.audio_0_avalon_right_channel_source_ready    (w_adc_right_ready),                                   //   avalon_right_channel_sink.data
 		.audio_0_avalon_right_channel_source_data   (w_adc_right_data),                                   //                            .valid
 		.audio_0_avalon_right_channel_source_valid   (w_adc_right_valid),                                 //                            .ready
-        .audio_pll_0_audio_clk_clk      (AUD_XCK)       
+        .audio_pll_0_audio_clk_clk      (AUD_XCK),       
+        .new_sdram_controller_0_s1_address         (new_sdram_controller_0_s1_address),
+        .new_sdram_controller_0_s1_byteenable_n    (new_sdram_controller_0_s1_byteenable_n),
+        .new_sdram_controller_0_s1_chipselect      (new_sdram_controller_0_s1_chipselect),
+        .new_sdram_controller_0_s1_writedata       (new_sdram_controller_0_s1_writedata),
+        .new_sdram_controller_0_s1_read_n          (new_sdram_controller_0_s1_read_n),
+        .new_sdram_controller_0_s1_write_n         (new_sdram_controller_0_s1_write_n),
+        .new_sdram_controller_0_s1_readdata        (new_sdram_controller_0_s1_readdata),
+        .new_sdram_controller_0_s1_readdatavalid   (new_sdram_controller_0_s1_readdatavalid),
+        .new_sdram_controller_0_s1_waitrequest     (new_sdram_controller_0_s1_waitrequest),
+        .new_sdram_controller_0_wire_addr          (DRAM_ADDR),
+        .new_sdram_controller_0_wire_ba            (DRAM_BA),
+        .new_sdram_controller_0_wire_cas_n         (DRAM_CAS_N),
+        .new_sdram_controller_0_wire_cke           (DRAM_CKE),
+        .new_sdram_controller_0_wire_cs_n          (DRAM_CS_N),
+        .new_sdram_controller_0_wire_dq            (DRAM_DQ),
+        .new_sdram_controller_0_wire_dqm           (DRAM_DQM),
+        .new_sdram_controller_0_wire_ras_n         (DRAM_RAS_N),
+        .new_sdram_controller_0_wire_we_n          (DRAM_WE_N),
+        .sys_sdram_pll_0_sdram_clk_clk             (DRAM_CLK)
     );
+
 	// Recorder
 	IPCore core(
 		.i_clk(CLOCK_50),
@@ -251,13 +295,15 @@ module DE2_115 (
         .to_dac_right_channel_data(w_dac_right_data),
         .to_dac_right_channel_valid(w_dac_right_valid),
         .to_dac_right_channel_ready(w_dac_right_ready),
-        .SRAM_DQ(SRAM_DQ),
-        .SRAM_ADDR(SRAM_ADDR),
-        .SRAM_OE_N(SRAM_OE_N),
-        .SRAM_WE_N(SRAM_WE_N),
-        .SRAM_CE_N(SRAM_CE_N),
-        .SRAM_UB_N(SRAM_UB_N),
-        .SRAM_LB_N(SRAM_LB_N),
+        .new_sdram_controller_0_s1_address         (new_sdram_controller_0_s1_address),
+        .new_sdram_controller_0_s1_byteenable_n    (new_sdram_controller_0_s1_byteenable_n),
+        .new_sdram_controller_0_s1_chipselect      (new_sdram_controller_0_s1_chipselect),
+        .new_sdram_controller_0_s1_writedata       (new_sdram_controller_0_s1_writedata),
+        .new_sdram_controller_0_s1_read_n          (new_sdram_controller_0_s1_read_n),
+        .new_sdram_controller_0_s1_write_n         (new_sdram_controller_0_s1_write_n),
+        .new_sdram_controller_0_s1_readdata        (new_sdram_controller_0_s1_readdata),
+        .new_sdram_controller_0_s1_readdatavalid   (new_sdram_controller_0_s1_readdatavalid),
+        .new_sdram_controller_0_s1_waitrequest     (new_sdram_controller_0_s1_waitrequest),
         .record(record),
         .play(play),
         .state(state),
