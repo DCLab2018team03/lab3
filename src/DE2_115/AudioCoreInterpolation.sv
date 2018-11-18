@@ -1,7 +1,7 @@
 module AudioCoreInterpolation (
-    input   [15:0]  i_data_prev,
-    input   [15:0]  i_data,
-    input   [3:0]   i_divisor,
+    input  [15:0]  i_data_prev,
+    input  [15:0]  i_data,
+    input  [3:0]   i_divisor,
     output logic [15:0]  o_quotient
 );
     wire [15:0] C, _C;
@@ -11,11 +11,11 @@ module AudioCoreInterpolation (
     /*  
     x/1  = x
     x/2  = x>>1
-    x/3 ~= x>>2 + x>>4 + x>>6
+    x/3  ~ x>>2 + x>>4 + x>>6
     x/4  = x>>2
-    x/5 ~= x>>3 + x>>4 + x>>6
-    x/6 ~= x>>3 + x>>5 + x>>7
-    x/7 ~= x>>3 + x>>6 + x>>9
+    x/5  ~ x>>3 + x>>4 + x>>6
+    x/6  ~ x>>3 + x>>5 + x>>7
+    x/7  ~ x>>3 + x>>6 + x>>9
     x/8  = x>>3
     */
     
