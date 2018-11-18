@@ -67,7 +67,7 @@ assign SRAM_DQ = SRAM_WE_N ? 16'hzzzz : n_SRAM_DQ;
 logic [22:0] n_SDRAM_ADDR;
 logic [31:0] SDRAM_DQ, n_SDRAM_DQ;
 logic sdram_data_counter, n_sdram_data_counter; // 2-16 bit -> 32bit
-assign new_sdram_controller_0_s1_byteenable_n = 4'b1111;
+assign new_sdram_controller_0_s1_byteenable_n = 4'b0;
 assign new_sdram_controller_0_s1_chipselect   = 1'b1;
 assign new_sdram_controller_0_s1_writedata = SDRAM_DQ;
 
