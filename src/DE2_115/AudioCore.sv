@@ -5,7 +5,6 @@ module AudioCore(
     input           i_rst,
     // Recorder Core
     input   [15:0]  i_event,                // 4code,2speed,4param,1inter,5reserved
-    output  [63:0]  o_time,                 // 12current,12total
     output logic o_stop_signal,
     // avalon_audio_slave
     // avalon_left_channel_source
@@ -56,13 +55,10 @@ module AudioCore(
     logic [2:0] state, n_state;
     logic [15:0] SRAM_DQ_prev, n_SRAM_DQ_prev;
     logic [3:0] slow_counter_r, slow_counter_w;
-    logic [31:0] play_counter_r, play_counter_w;
     logic [15:0] interpolation;
     logic [31:0] data_length_r, data_length_w;
     logic writedatalength_counter_w, writedatalength_counter_r;
     logic [15:0] n_to_dac_left_channel_data, n_to_dac_right_channel_data;
-    // output control
-    assign o_time = {play_counter_r, data_length_r};
     // audio
     logic n_to_dac_left_channel_valid, n_to_dac_right_channel_valid;
     assign from_adc_right_channel_ready = 0;
@@ -75,19 +71,18 @@ module AudioCore(
     assign SRAM_DQ = SRAM_WE_N ? 16'hzzzz : n_SRAM_DQ;
     // debug
     assign stat = state;
-    
+    /*
     AudioCoreInterpolation interpol(
         .i_data_prev(SRAM_DQ_prev),
         .i_data(SRAM_DQ),
         .i_divisor(control_speed),
         .o_quotient(interpolation)
     );
-    
+    */
     always_ff @(posedge i_clk or posedge i_rst) begin
         if (i_rst) begin
             state <= IDLE;
             slow_counter_r <= 0;
-            play_counter_r <= 0;
             data_length_r <= 2;
             writedatalength_counter_r <= 0;
             SRAM_ADDR <= 0;
@@ -99,7 +94,6 @@ module AudioCore(
         else begin
             state <= n_state;
             slow_counter_r <= slow_counter_w;
-            play_counter_r <= play_counter_w;
             data_length_r <= data_length_w;
             writedatalength_counter_r <= writedatalength_counter_w;
             SRAM_ADDR <= n_SRAM_ADDR;
@@ -114,7 +108,6 @@ module AudioCore(
         n_state = state;
         SRAM_DQ_prev = 0;
         slow_counter_w = slow_counter_r;
-        play_counter_w = play_counter_r;
         data_length_w = data_length_r;
         writedatalength_counter_w = writedatalength_counter_r;
 
@@ -127,7 +120,7 @@ module AudioCore(
 
         n_to_dac_left_channel_data = 0;
         n_to_dac_right_channel_data = 0;
-
+        interpolation = 0;
         o_stop_signal = 0;
         case (state)
             IDLE: begin
@@ -136,7 +129,6 @@ module AudioCore(
                         n_state = READ_LENGTH;
                         n_SRAM_ADDR = 0;
                         slow_counter_w = 0;
-                        play_counter_w = 0;
                     end
                     REC_RECORD: begin
                         n_state = RECORD;
@@ -164,7 +156,7 @@ module AudioCore(
                     REC_PAUSE: n_state = PLAY_PAUSE;
                     REC_STOP: n_state = IDLE;
                 endcase
-                if (play_counter_r >= data_length_r) begin
+                if (SRAM_ADDR >= data_length_r) begin
                     o_stop_signal = 1;
                     n_state = IDLE;
                 end
@@ -176,14 +168,12 @@ module AudioCore(
                         if (to_dac_left_channel_ready && to_dac_left_channel_valid) begin
                             n_to_dac_right_channel_valid = 1;
                             n_to_dac_left_channel_valid = 0;
-                            n_SRAM_ADDR = SRAM_ADDR + 1;
-                            play_counter_w = play_counter_r + 1; 
+                            n_SRAM_ADDR = SRAM_ADDR + 1; 
                         end
                         if (to_dac_right_channel_ready && to_dac_right_channel_valid) begin
                             n_to_dac_right_channel_valid = 0;
                             n_to_dac_left_channel_valid = 1;
                             n_SRAM_ADDR = SRAM_ADDR + 1;
-                            play_counter_w = play_counter_r + 1;
                         end
                     end
                     REC_SLOW: begin
@@ -192,6 +182,7 @@ module AudioCore(
                             n_to_dac_right_channel_data = SRAM_DQ;
                         end
                         else begin
+                            Interpol(SRAM_DQ_prev, SRAM_DQ, control_speed);
                             if (slow_counter_r == 0) begin
                                 SRAM_DQ_prev = SRAM_DQ; 
                                 n_to_dac_left_channel_data = SRAM_DQ;
@@ -208,7 +199,6 @@ module AudioCore(
                             if (slow_counter_r == control_speed - 1) begin 
                                 n_SRAM_ADDR = SRAM_ADDR + 1;
                                 slow_counter_w = 0;
-                                play_counter_w = play_counter_r + 1; 
                             end
                             else begin
                                 slow_counter_w = slow_counter_r + 1;
@@ -217,13 +207,13 @@ module AudioCore(
                         if (to_dac_right_channel_ready && to_dac_right_channel_valid) begin
                             n_to_dac_right_channel_valid = 0;
                             n_to_dac_left_channel_valid = 1;
-                            n_SRAM_ADDR = SRAM_ADDR + 1;
                             if (slow_counter_r == control_speed - 1) begin
                                 n_SRAM_ADDR = SRAM_ADDR + 1;
                                 slow_counter_w = 0;
-                                play_counter_w = play_counter_r + 1; 
                             end
-                            else slow_counter_w = slow_counter_r + 1;
+                            else begin
+                                slow_counter_w = slow_counter_r + 1;
+                            end
                         end                      
                     end
                     REC_FAST: begin
@@ -232,14 +222,12 @@ module AudioCore(
                         if (to_dac_left_channel_ready && to_dac_left_channel_valid) begin
                             n_to_dac_right_channel_valid = 1;
                             n_to_dac_left_channel_valid = 0;
-                            n_SRAM_ADDR = SRAM_ADDR + control_speed;
-                            play_counter_w = play_counter_r + control_speed; 
+                            n_SRAM_ADDR = SRAM_ADDR + control_speed; 
                         end
                         if (to_dac_right_channel_ready && to_dac_right_channel_valid) begin
                             n_to_dac_right_channel_valid = 0;
                             n_to_dac_left_channel_valid = 1;
                             n_SRAM_ADDR = SRAM_ADDR + control_speed;
-                            play_counter_w = play_counter_r + control_speed;
                         end
                     end
                 endcase
@@ -328,4 +316,24 @@ task setSRAMenable;
     end    
 endtask
 
+task Interpol;
+    input signed [15:0] data_prev, data,
+    input signed [3:0]  speed;
+    begin
+        logic signed [15:0] diff;
+        assign diff = data - data_prev;
+        always_comb begin
+            case (speed)
+                4'd2:    interpolation = diff >>> 1;
+                4'd3:    interpolation = (diff>>>2)+(diff>>>4)+(diff>>>6);
+                4'd4:    interpolation = diff >>> 2;
+                4'd5:    interpolation = (diff>>>3)+(diff>>>4)+(diff>>>6);
+                4'd6:    interpolation = (diff>>>3)+(diff>>>5)+(diff>>>7);
+                4'd7:    interpolation = (diff>>>3)+(diff>>>6)+(diff>>>9);
+                4'd8:    interpolation = diff >>> 3;
+                default: interpolation = 0;
+            endcase
+        end
+    end
+endtask
 endmodule
