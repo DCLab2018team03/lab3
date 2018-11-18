@@ -29,7 +29,7 @@ module TimeCore(
     logic [3:0] play_min_1, play_min_0, play_sec_1, play_sec_0;
     logic [3:0] n_play_min_1, n_play_min_0, n_play_sec_1, n_play_sec_0;
     assign o_record_time = {rec_min_1, rec_min_0, rec_sec_1, rec_sec_0};
-    assign o_plat_time = {play_min_1, play_min_0, play_sec_1, play_sec_0};
+    assign o_play_time = {play_min_1, play_min_0, play_sec_1, play_sec_0};
 
 
     logic [3:0] control_code;
