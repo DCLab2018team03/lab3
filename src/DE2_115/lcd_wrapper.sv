@@ -21,7 +21,7 @@ module LCD_wrapper(
     logic [1:0] control_mode;
     logic [3:0] control_speed;
     logic       control_interpol;
-    logic [1:0] state, n_state;
+    logic [1:0] state;
     logic [7:0] address;
     logic       line;
     logic [25:0] clk_count;
@@ -36,9 +36,13 @@ module LCD_wrapper(
 
     always_ff @(posedge i_clk or posedge i_rst) begin
         if ( i_rst ) begin
+            control_code <= REC_NONE;
+            curr_code <= REC_NONE;
+            control_mode <= REC_NORMAL;
+            control_speed <= 1;
+            control_interpol <= 0;
             state <= CLEAR_LCD;
             address <= 8'h00;
-            curr_code <= 4'd0;
             line <= 1'b0;
             clk_count <= 26'b0;
             sec_ten <= 3'b0;
@@ -72,6 +76,7 @@ module LCD_wrapper(
                 case(state)
                     WRITE: begin
                         if(!BUSY) begin
+                            START <= 1;
                             case(line)
                                 1'b0: begin
                                     case(control_code)
@@ -341,6 +346,7 @@ module LCD_wrapper(
                     end
                     CLEAR_LCD: begin
                         if(!BUSY) begin
+                            START <= 1;
                             case(address)
                                 8'h00: begin
                                     ADDRESS <= 8'h00;
@@ -384,6 +390,9 @@ module LCD_wrapper(
                                 end
                             endcase
                         end
+                    end
+                    REST: begin
+                        START <= 0;
                     end
                 endcase
             end
