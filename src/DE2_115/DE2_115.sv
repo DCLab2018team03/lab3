@@ -273,7 +273,26 @@ module DE2_115 (
 		.audio_0_avalon_right_channel_source_ready    (w_adc_right_ready),                                   //   avalon_right_channel_sink.data
 		.audio_0_avalon_right_channel_source_data   (w_adc_right_data),                                   //                            .valid
 		.audio_0_avalon_right_channel_source_valid   (w_adc_right_valid),                                 //                            .ready
-        .audio_pll_0_audio_clk_clk      (AUD_XCK)   
+        .audio_pll_0_audio_clk_clk      (AUD_XCK),
+        .new_sdram_controller_0_s1_address         (new_sdram_controller_0_s1_address),
+        .new_sdram_controller_0_s1_byteenable_n    (new_sdram_controller_0_s1_byteenable_n),
+        .new_sdram_controller_0_s1_chipselect      (new_sdram_controller_0_s1_chipselect),
+        .new_sdram_controller_0_s1_writedata       (new_sdram_controller_0_s1_writedata),
+        .new_sdram_controller_0_s1_read_n          (new_sdram_controller_0_s1_read_n),
+        .new_sdram_controller_0_s1_write_n         (new_sdram_controller_0_s1_write_n),
+        .new_sdram_controller_0_s1_readdata        (new_sdram_controller_0_s1_readdata),
+        .new_sdram_controller_0_s1_readdatavalid   (new_sdram_controller_0_s1_readdatavalid),
+        .new_sdram_controller_0_s1_waitrequest     (new_sdram_controller_0_s1_waitrequest),
+        .new_sdram_controller_0_wire_addr          (DRAM_ADDR),
+        .new_sdram_controller_0_wire_ba            (DRAM_BA),
+        .new_sdram_controller_0_wire_cas_n         (DRAM_CAS_N),
+        .new_sdram_controller_0_wire_cke           (DRAM_CKE),
+        .new_sdram_controller_0_wire_cs_n          (DRAM_CS_N),
+        .new_sdram_controller_0_wire_dq            (DRAM_DQ),
+        .new_sdram_controller_0_wire_dqm           (DRAM_DQM),
+        .new_sdram_controller_0_wire_ras_n         (DRAM_RAS_N),
+        .new_sdram_controller_0_wire_we_n          (DRAM_WE_N),
+        .sys_sdram_pll_0_sdram_clk_clk             (DRAM_CLK)
     );
 	// Input Controller
 	InputController inputController(
@@ -311,14 +330,16 @@ module DE2_115 (
         .to_dac_right_channel_data(w_dac_right_data),
         .to_dac_right_channel_valid(w_dac_right_valid),
         .to_dac_right_channel_ready(w_dac_right_ready),
-        // SRAM
-        .SRAM_DQ(SRAM_DQ),
-        .SRAM_ADDR(SRAM_ADDR),
-        .SRAM_WE_N(SRAM_WE_N),
-        .SRAM_CE_N(SRAM_CE_N),
-        .SRAM_OE_N(SRAM_OE_N),
-        .SRAM_LB_N(SRAM_LB_N),
-        .SRAM_UB_N(SRAM_UB_N),
+        // SDRAM
+        .new_sdram_controller_0_s1_address         (new_sdram_controller_0_s1_address),
+        .new_sdram_controller_0_s1_byteenable_n    (new_sdram_controller_0_s1_byteenable_n),
+        .new_sdram_controller_0_s1_chipselect      (new_sdram_controller_0_s1_chipselect),
+        .new_sdram_controller_0_s1_writedata       (new_sdram_controller_0_s1_writedata),
+        .new_sdram_controller_0_s1_read_n          (new_sdram_controller_0_s1_read_n),
+        .new_sdram_controller_0_s1_write_n         (new_sdram_controller_0_s1_write_n),
+        .new_sdram_controller_0_s1_readdata        (new_sdram_controller_0_s1_readdata),
+        .new_sdram_controller_0_s1_readdatavalid   (new_sdram_controller_0_s1_readdatavalid),
+        .new_sdram_controller_0_s1_waitrequest     (new_sdram_controller_0_s1_waitrequest)
         .o_stop_signal(n_stop_signal)
 	);
     // LCD

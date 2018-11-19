@@ -23,14 +23,16 @@ module AudioCore(
     output logic [15:0] to_dac_right_channel_data,
     output logic to_dac_right_channel_valid,
     input  to_dac_right_channel_ready,
-    // SRAM
-    inout  logic [15:0] SRAM_DQ,     // SRAM Data bus 16 Bits
-    output logic [19:0] SRAM_ADDR,   // SRAM Address bus 20 Bits
-    output logic        SRAM_WE_N,   // SRAM Write Enable
-    output logic        SRAM_CE_N,   // SRAM Chip Enable
-    output logic        SRAM_OE_N,   // SRAM Output Enable
-    output logic        SRAM_LB_N,   // SRAM Low-byte Data Mask 
-    output logic        SRAM_UB_N    // SRAM High-byte Data Mask
+    // SDRAM
+    output logic [22:0] new_sdram_controller_0_s1_address,                //                   new_sdram_controller_0_s1.address
+	output logic [3:0]  new_sdram_controller_0_s1_byteenable_n,           //                   .byteenable_n
+	output logic        new_sdram_controller_0_s1_chipselect,             //                   .chipselect
+	output logic [31:0] new_sdram_controller_0_s1_writedata,              //                   .writedata
+	output logic        new_sdram_controller_0_s1_read_n,                 //                   .read_n
+	output logic        new_sdram_controller_0_s1_write_n,                //                   .write_n
+	input  logic [31:0] new_sdram_controller_0_s1_readdata,               //                   .readdata
+	input  logic        new_sdram_controller_0_s1_readdatavalid,          //                   .readdatavalid
+	input  logic        new_sdram_controller_0_s1_waitrequest,            //                   .waitrequest
 );
 
     logic [3:0] control_code;  // 1:play, 2:pause, 3:stop, 4:record
@@ -50,8 +52,11 @@ module AudioCore(
     localparam WRITE_DATALENGTH_BEFORE_STOP = 5;
     localparam WRITE_DATALENGTH_BEFORE_PAUSE = 6;
     localparam READ_LENGTH = 7;
+
+    localparam WRITE_WAIT = ; 
+    localparam READ_WAIT = ;   
     
-    logic [2:0] state, n_state;
+    logic [2:0] state, n_state, to_state, n_to_state;
     logic [15:0] SRAM_DQ_prev, n_SRAM_DQ_prev;
     logic [3:0] slow_counter_r, slow_counter_w;
     logic [15:0] interpolation, n_interpolation;
@@ -71,6 +76,26 @@ module AudioCore(
 
     logic n_o_stop_signal;
 
+    logic [22:0] sdram_address, n_sdram_address;                //                   new_sdram_controller_0_s1.address
+	logic [31:0] sdram_writedata, n_sdram_writedata;              //                   .writedata
+	logic        sdram_read;                 //                   .read_n
+	logic        sdram_write;                //                   .write_n
+	logic [31:0] sdram_readdata, n_sdram_readdata;               //                   .readdata
+	logic        sdram_readdatavalid;          //                   .readdatavalid
+	logic        sdram_waitrequest;            //                   .waitrequest
+
+    assign new_sdram_controller_0_s1_address = sdram_address;                //                   new_sdram_controller_0_s1.address
+	assign new_sdram_controller_0_s1_byteenable_n = 4'd0;           //                   .byteenable_n
+	assign new_sdram_controller_0_s1_chipselect = 1'b1;             //                   .chipselect
+	assign new_sdram_controller_0_s1_writedata = sdram_writedata;              //                   .writedata
+	assign new_sdram_controller_0_s1_read_n = ~sdram_read;                 //                   .read_n
+	assign new_sdram_controller_0_s1_write_n = ~sdram_write;                //                   .write_n
+
+	assign sdram_readdatavalid = new_sdram_controller_0_s1_readdatavalid;          //                   .readdatavalid
+	assign sdram_waitrequest = new_sdram_controller_0_s1_waitrequest;            //                   .waitrequest
+
+
+
     always_ff @(posedge i_clk or posedge i_rst) begin
         if (i_rst) begin
             state <= IDLE;
@@ -85,6 +110,11 @@ module AudioCore(
             to_dac_left_channel_data <= 0;
             to_dac_right_channel_data <= 0;
             o_stop_signal <= 0;
+
+            to_state <= IDLE;
+            sdram_address <= 0;
+            sdram_writedata <= 0;
+            sdram_readdata <= 0;
         end
         else begin
             state <= n_state;
@@ -99,6 +129,11 @@ module AudioCore(
             to_dac_left_channel_data <= n_to_dac_left_channel_data;
             to_dac_right_channel_data <= n_to_dac_right_channel_data;
             o_stop_signal <= n_o_stop_signal;
+            
+            to_state <= n_to_state;
+            sdram_address <= n_sdram_address;
+            sdram_writedata <= n_sdram_writedata;
+            sdram_readdata <= n_sdram_readdata;
         end
     end
 
@@ -120,6 +155,13 @@ module AudioCore(
         n_to_dac_right_channel_data = to_dac_right_channel_data;
         n_interpolation = interpolation;
         n_o_stop_signal = 0;
+
+        n_to_state = to_state;
+        n_sdram_address = sdram_address;
+        n_sdram_writedata = sdram_writedata
+        n_sdram_readdata = sdram_readdata;
+        sdram_read = 0;
+        sdram_write = 0;
         case (state)
             IDLE: begin
                 n_to_dac_left_channel_valid = 0;
@@ -292,6 +334,22 @@ module AudioCore(
                     n_SRAM_ADDR = data_length_r[19:0];
                 end
                 writedatalength_counter_w = writedatalength_counter_r + 1;
+            end
+            WRITE_WAIT: begin
+                sdram_write = 1;
+                // set n_sdram_writedata in prev state
+                if ( !sdram_waitrequest ) begin
+                    n_sdram_address = sdram_address + 1;
+                    n_state = n_to_state;
+                end
+            end
+            READ_WAIT: begin
+                sdram_read = 1;
+                n_sdram_readdata = new_sdram_controller_0_s1_readdata;
+                if ( !sdram_waitrequest && sdram_readdatavalid) begin
+                    n_sdram_address = sdram_address + 1;
+                    n_state = to_state;
+                end
             end
         endcase
     end

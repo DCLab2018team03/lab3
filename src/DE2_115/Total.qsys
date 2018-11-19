@@ -49,6 +49,22 @@
          type = "int";
       }
    }
+   element new_sdram_controller_0
+   {
+      datum _sortIndex
+      {
+         value = "4";
+         type = "int";
+      }
+   }
+   element sys_sdram_pll_0
+   {
+      datum _sortIndex
+      {
+         value = "5";
+         type = "int";
+      }
+   }
 }
 ]]></parameter>
  <parameter name="clockCrossingAdapter" value="HANDSHAKE" />
@@ -106,7 +122,22 @@
    type="clock"
    dir="start" />
  <interface name="clk" internal="clk_0.clk_in" type="clock" dir="end" />
+ <interface
+   name="new_sdram_controller_0_s1"
+   internal="new_sdram_controller_0.s1"
+   type="avalon"
+   dir="end" />
+ <interface
+   name="new_sdram_controller_0_wire"
+   internal="new_sdram_controller_0.wire"
+   type="conduit"
+   dir="end" />
  <interface name="reset" internal="clk_0.clk_in_reset" type="reset" dir="end" />
+ <interface
+   name="sys_sdram_pll_0_sdram_clk"
+   internal="sys_sdram_pll_0.sdram_clk"
+   type="clock"
+   dir="start" />
  <module
    name="audio_0"
    kind="altera_up_avalon_audio"
@@ -158,6 +189,50 @@
   <parameter name="inputClockFrequency" value="0" />
   <parameter name="resetSynchronousEdges" value="NONE" />
  </module>
+ <module
+   name="new_sdram_controller_0"
+   kind="altera_avalon_new_sdram_controller"
+   version="15.0"
+   enabled="1">
+  <parameter name="TAC" value="5.5" />
+  <parameter name="TMRD" value="3" />
+  <parameter name="TRCD" value="20.0" />
+  <parameter name="TRFC" value="70.0" />
+  <parameter name="TRP" value="20.0" />
+  <parameter name="TWR" value="14.0" />
+  <parameter name="casLatency" value="3" />
+  <parameter name="clockRate" value="50000000" />
+  <parameter name="columnWidth" value="8" />
+  <parameter name="componentName">$${FILENAME}_new_sdram_controller_0</parameter>
+  <parameter name="dataWidth" value="32" />
+  <parameter name="generateSimulationModel" value="false" />
+  <parameter name="initNOPDelay" value="0.0" />
+  <parameter name="initRefreshCommands" value="2" />
+  <parameter name="masteredTristateBridgeSlave" value="0" />
+  <parameter name="model">single_Micron_MT48LC4M32B2_7_chip</parameter>
+  <parameter name="numberOfBanks" value="4" />
+  <parameter name="numberOfChipSelects" value="1" />
+  <parameter name="pinsSharedViaTriState" value="false" />
+  <parameter name="powerUpDelay" value="100.0" />
+  <parameter name="refreshPeriod" value="15.625" />
+  <parameter name="registerDataIn" value="true" />
+  <parameter name="rowWidth" value="13" />
+ </module>
+ <module
+   name="sys_sdram_pll_0"
+   kind="altera_up_avalon_sys_sdram_pll"
+   version="15.0"
+   enabled="1">
+  <parameter name="AUTO_DEVICE" value="EP4CE115F29C7" />
+  <parameter name="AUTO_DEVICE_SPEEDGRADE" value="7" />
+  <parameter name="CIII_boards" value="DE0" />
+  <parameter name="CIV_boards" value="DE2-115" />
+  <parameter name="CV_boards" value="DE1-SoC" />
+  <parameter name="device_family" value="Cyclone IV E" />
+  <parameter name="gui_outclk" value="50.0" />
+  <parameter name="gui_refclk" value="50.0" />
+  <parameter name="other_boards" value="None" />
+ </module>
  <connection kind="clock" version="15.0" start="clk_0.clk" end="audio_0.clk" />
  <connection
    kind="clock"
@@ -168,12 +243,27 @@
    kind="clock"
    version="15.0"
    start="clk_0.clk"
+   end="new_sdram_controller_0.clk" />
+ <connection
+   kind="clock"
+   version="15.0"
+   start="clk_0.clk"
    end="audio_pll_0.ref_clk" />
+ <connection
+   kind="clock"
+   version="15.0"
+   start="clk_0.clk"
+   end="sys_sdram_pll_0.ref_clk" />
  <connection
    kind="reset"
    version="15.0"
    start="clk_0.clk_reset"
    end="audio_pll_0.ref_reset" />
+ <connection
+   kind="reset"
+   version="15.0"
+   start="clk_0.clk_reset"
+   end="sys_sdram_pll_0.ref_reset" />
  <connection
    kind="reset"
    version="15.0"
@@ -184,6 +274,11 @@
    version="15.0"
    start="clk_0.clk_reset"
    end="audio_and_video_config_0.reset" />
+ <connection
+   kind="reset"
+   version="15.0"
+   start="clk_0.clk_reset"
+   end="new_sdram_controller_0.reset" />
  <interconnectRequirement for="$system" name="qsys_mm.clockCrossingAdapter" value="HANDSHAKE" />
  <interconnectRequirement for="$system" name="qsys_mm.enableEccProtection" value="FALSE" />
  <interconnectRequirement for="$system" name="qsys_mm.insertDefaultSlave" value="FALSE" />

@@ -25,10 +25,29 @@ module Total (
 		output wire        audio_and_video_config_0_external_interface_SCLK, //                                            .SCLK
 		output wire        audio_pll_0_audio_clk_clk,                        //                       audio_pll_0_audio_clk.clk
 		input  wire        clk_clk,                                          //                                         clk.clk
-		input  wire        reset_reset_n                                     //                                       reset.reset_n
+		input  wire [22:0] new_sdram_controller_0_s1_address,                //                   new_sdram_controller_0_s1.address
+		input  wire [3:0]  new_sdram_controller_0_s1_byteenable_n,           //                                            .byteenable_n
+		input  wire        new_sdram_controller_0_s1_chipselect,             //                                            .chipselect
+		input  wire [31:0] new_sdram_controller_0_s1_writedata,              //                                            .writedata
+		input  wire        new_sdram_controller_0_s1_read_n,                 //                                            .read_n
+		input  wire        new_sdram_controller_0_s1_write_n,                //                                            .write_n
+		output wire [31:0] new_sdram_controller_0_s1_readdata,               //                                            .readdata
+		output wire        new_sdram_controller_0_s1_readdatavalid,          //                                            .readdatavalid
+		output wire        new_sdram_controller_0_s1_waitrequest,            //                                            .waitrequest
+		output wire [12:0] new_sdram_controller_0_wire_addr,                 //                 new_sdram_controller_0_wire.addr
+		output wire [1:0]  new_sdram_controller_0_wire_ba,                   //                                            .ba
+		output wire        new_sdram_controller_0_wire_cas_n,                //                                            .cas_n
+		output wire        new_sdram_controller_0_wire_cke,                  //                                            .cke
+		output wire        new_sdram_controller_0_wire_cs_n,                 //                                            .cs_n
+		inout  wire [31:0] new_sdram_controller_0_wire_dq,                   //                                            .dq
+		output wire [3:0]  new_sdram_controller_0_wire_dqm,                  //                                            .dqm
+		output wire        new_sdram_controller_0_wire_ras_n,                //                                            .ras_n
+		output wire        new_sdram_controller_0_wire_we_n,                 //                                            .we_n
+		input  wire        reset_reset_n,                                    //                                       reset.reset_n
+		output wire        sys_sdram_pll_0_sdram_clk_clk                     //                   sys_sdram_pll_0_sdram_clk.clk
 	);
 
-	wire    rst_controller_reset_out_reset; // rst_controller:reset_out -> [audio_0:reset, audio_and_video_config_0:reset, audio_pll_0:ref_reset_reset]
+	wire    rst_controller_reset_out_reset; // rst_controller:reset_out -> [audio_0:reset, audio_and_video_config_0:reset, audio_pll_0:ref_reset_reset, new_sdram_controller_0:reset_n, sys_sdram_pll_0:ref_reset_reset]
 
 	Total_audio_0 audio_0 (
 		.clk                          (clk_clk),                                   //                         clk.clk
@@ -70,6 +89,37 @@ module Total (
 		.ref_clk_clk        (clk_clk),                        //      ref_clk.clk
 		.ref_reset_reset    (rst_controller_reset_out_reset), //    ref_reset.reset
 		.audio_clk_clk      (audio_pll_0_audio_clk_clk),      //    audio_clk.clk
+		.reset_source_reset ()                                // reset_source.reset
+	);
+
+	Total_new_sdram_controller_0 new_sdram_controller_0 (
+		.clk            (clk_clk),                                 //   clk.clk
+		.reset_n        (~rst_controller_reset_out_reset),         // reset.reset_n
+		.az_addr        (new_sdram_controller_0_s1_address),       //    s1.address
+		.az_be_n        (new_sdram_controller_0_s1_byteenable_n),  //      .byteenable_n
+		.az_cs          (new_sdram_controller_0_s1_chipselect),    //      .chipselect
+		.az_data        (new_sdram_controller_0_s1_writedata),     //      .writedata
+		.az_rd_n        (new_sdram_controller_0_s1_read_n),        //      .read_n
+		.az_wr_n        (new_sdram_controller_0_s1_write_n),       //      .write_n
+		.za_data        (new_sdram_controller_0_s1_readdata),      //      .readdata
+		.za_valid       (new_sdram_controller_0_s1_readdatavalid), //      .readdatavalid
+		.za_waitrequest (new_sdram_controller_0_s1_waitrequest),   //      .waitrequest
+		.zs_addr        (new_sdram_controller_0_wire_addr),        //  wire.export
+		.zs_ba          (new_sdram_controller_0_wire_ba),          //      .export
+		.zs_cas_n       (new_sdram_controller_0_wire_cas_n),       //      .export
+		.zs_cke         (new_sdram_controller_0_wire_cke),         //      .export
+		.zs_cs_n        (new_sdram_controller_0_wire_cs_n),        //      .export
+		.zs_dq          (new_sdram_controller_0_wire_dq),          //      .export
+		.zs_dqm         (new_sdram_controller_0_wire_dqm),         //      .export
+		.zs_ras_n       (new_sdram_controller_0_wire_ras_n),       //      .export
+		.zs_we_n        (new_sdram_controller_0_wire_we_n)         //      .export
+	);
+
+	Total_sys_sdram_pll_0 sys_sdram_pll_0 (
+		.ref_clk_clk        (clk_clk),                        //      ref_clk.clk
+		.ref_reset_reset    (rst_controller_reset_out_reset), //    ref_reset.reset
+		.sys_clk_clk        (),                               //      sys_clk.clk
+		.sdram_clk_clk      (sys_sdram_pll_0_sdram_clk_clk),  //    sdram_clk.clk
 		.reset_source_reset ()                                // reset_source.reset
 	);
 
