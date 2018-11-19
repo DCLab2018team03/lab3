@@ -199,26 +199,22 @@ module AudioCore(
                         if (to_dac_left_channel_ready && to_dac_left_channel_valid) begin
                             n_to_dac_right_channel_valid = 1;
                             n_to_dac_left_channel_valid = 0;
-                            if (slow_counter_r == control_speed - 1) begin
+                            if (slow_counter_r == 0) begin
                                 SRAM_DQ_prev = SRAM_DQ; 
                                 n_SRAM_ADDR = SRAM_ADDR + 1;
-                                slow_counter_w = 0;
                             end
-                            else begin
-                                slow_counter_w = slow_counter_r + 1;
-                            end
+                            if (slow_counter_r == control_speed - 1) slow_counter_w = 0;
+                            else slow_counter_w = slow_counter_r + 1;
                         end
                         if (to_dac_right_channel_ready && to_dac_right_channel_valid) begin
                             n_to_dac_right_channel_valid = 0;
                             n_to_dac_left_channel_valid = 1;
-                            if (slow_counter_r == control_speed - 1) begin
-                                SRAM_DQ_prev = SRAM_DQ;
+                            if (slow_counter_r == 0) begin
+                                SRAM_DQ_prev = SRAM_DQ; 
                                 n_SRAM_ADDR = SRAM_ADDR + 1;
-                                slow_counter_w = 0;
                             end
-                            else begin
-                                slow_counter_w = slow_counter_r + 1;
-                            end
+                            if (slow_counter_r == control_speed - 1) slow_counter_w = 0;
+                            else slow_counter_w = slow_counter_r + 1;
                         end                      
                     end
                     REC_FAST: begin
@@ -325,22 +321,22 @@ task setSRAMenable;
 endtask
 
 task Interpol;
-    input signed [15:0] data_prev, data; 
-    input signed [3:0]  speed;
-    output signed [15:0] interpolation;
+    input [15:0] data_prev, data; 
+    input [3:0]  speed;
+    output [15:0] interpolation;
 
-	logic signed [15:0] diff;
+	logic [15:0] diff;
     
-    diff = data - data_prev;
+    diff = signed'(data) - signed'(data_prev);
         
     case (speed)
-        4'd2:    interpolation = diff >>> 1;
-        4'd3:    interpolation = (diff>>>2)+(diff>>>4)+(diff>>>6);
-        4'd4:    interpolation = diff >>> 2;
-        4'd5:    interpolation = (diff>>>3)+(diff>>>4)+(diff>>>6);
-        4'd6:    interpolation = (diff>>>3)+(diff>>>5)+(diff>>>7);
-        4'd7:    interpolation = (diff>>>3)+(diff>>>6)+(diff>>>9);
-        4'd8:    interpolation = diff >>> 3;
+        4'd2:    interpolation = signed'(diff) >>> 1;
+        4'd3:    interpolation = (signed'(diff)>>>2)+(signed'(diff)>>>4)+(signed'(diff)>>>6);
+        4'd4:    interpolation = signed'(diff) >>> 2;
+        4'd5:    interpolation = (signed'(diff)>>>3)+(signed'(diff)>>>4)+(signed'(diff)>>>6);
+        4'd6:    interpolation = (signed'(diff)>>>3)+(signed'(diff)>>>5)+(signed'(diff)>>>7);
+        4'd7:    interpolation = (signed'(diff)>>>3)+(signed'(diff)>>>6)+(signed'(diff)>>>9);
+        4'd8:    interpolation = signed'(diff) >>> 3;
         default: interpolation = 0;
     endcase
 
