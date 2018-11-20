@@ -24,6 +24,7 @@ module TimeCore(
     logic [3:0] increment;
     logic [2:0] sub_increment, n_sub_increment;
 
+    logic       play_flag, n_play_flag;
     logic [3:0] rec_min_1, rec_min_0, rec_sec_1, rec_sec_0;
     logic [3:0] n_rec_min_1, n_rec_min_0, n_rec_sec_1, n_rec_sec_0;
     logic [3:0] play_min_1, play_min_0, play_sec_1, play_sec_0;
@@ -67,6 +68,7 @@ module TimeCore(
             play_sec_0 <= 0;
             sub_increment <= 0;
             clk_counter <= 0;
+            play_flag <= 0;
             state <= IDLE;
         end else begin
             rec_min_1  <= n_rec_min_1;
@@ -78,7 +80,8 @@ module TimeCore(
             play_sec_1 <= n_play_sec_1;
             play_sec_0 <= n_play_sec_0;
             clk_counter <= n_clk_counter;
-            sub_increment = n_sub_increment;
+            play_flag <= n_play_flag;
+            sub_increment <= n_sub_increment;
             state <= n_state;
         end
     end
@@ -101,6 +104,7 @@ module TimeCore(
         n_play_min_0 = play_min_0;
         n_play_sec_1 = play_sec_1;
         n_play_sec_0 = play_sec_0;
+        n_play_flag = play_flag;
 
         if (rec_sec_0 == 4'd10) begin
             n_rec_sec_0 = 0;
@@ -192,6 +196,14 @@ module TimeCore(
                 else begin
                     n_clk_counter = clk_counter + 1;
                 end
+                if (play_flag) begin
+                    n_play_flag = 0;
+                    n_clk_counter = 0;
+                    n_rec_min_1 = 0;
+                    n_rec_min_0 = 0;
+                    n_rec_sec_1 = 0;
+                    n_rec_sec_0 = 0;
+                end
             end
             STOP: begin
                 n_clk_counter = 0;
@@ -208,6 +220,7 @@ module TimeCore(
                 end
             end
             PLAY: begin
+                n_play_flag = 1;
                 if ( clk_counter >= 26'd50000000 ) begin
                     n_clk_counter = 0;
                     n_play_sec_0 = play_sec_0 + 1;
