@@ -108,11 +108,24 @@ module TimeCore(
         end
         if (rec_sec_1 == 4'd6) begin
             n_rec_sec_1 = 0;
-            n_rec_min_0= rec_min_0 + 1;
+            n_rec_min_0 = rec_min_0 + 1;
         end
         if (rec_min_0 == 4'd10) begin
             n_rec_min_0 = 0;
             n_rec_min_1 = rec_min_1 + 1;
+        end
+
+        if (play_sec_0 == 4'd10) begin
+            n_play_sec_0 = 0;
+            n_play_sec_1 = play_sec_1 + 1;
+        end
+        if (play_sec_1 == 4'd6) begin
+            n_play_sec_1 = 0;
+            n_play_min_0 = play_min_0 + 1;
+        end
+        if (play_min_0 == 4'd10) begin
+            n_play_min_0 = 0;
+            n_play_min_1 = play_min_1 + 1;
         end
 
         increment = 0;
