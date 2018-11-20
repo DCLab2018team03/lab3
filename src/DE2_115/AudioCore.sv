@@ -76,16 +76,25 @@ module AudioCore(
 
     logic n_o_stop_signal;
 
+
+    /*
+    In RECORD and PLAY, maintain bytecounter in the same way as SRAM_ADDR,
+    and I will increase the sdram_address every 2 bytecounter change.
+    Therefore, theoretically, you will only need to set n_state = XXXX_WAIT and to_state = original n_state
+    and won't need to change the whole operation. 
+    */
     logic [22:0] sdram_address, n_sdram_address;                //                   new_sdram_controller_0_s1.address
-	logic [31:0] sdram_writedata, n_sdram_writedata;              //                   .writedata
+	logic [3:0]  sdram_byteenable;
+    logic [31:0] sdram_writedata;              //                   .writedata
 	logic        sdram_read;                 //                   .read_n
 	logic        sdram_write;                //                   .write_n
 	logic [31:0] sdram_readdata, n_sdram_readdata;               //                   .readdata
 	logic        sdram_readdatavalid;          //                   .readdatavalid
 	logic        sdram_waitrequest;            //                   .waitrequest
+    logic        bytecounter, n_bytecounter;
 
     assign new_sdram_controller_0_s1_address = sdram_address;                //                   new_sdram_controller_0_s1.address
-	assign new_sdram_controller_0_s1_byteenable_n = 4'd0;           //                   .byteenable_n
+	assign new_sdram_controller_0_s1_byteenable_n = ~sdram_byteenable;           //                   .byteenable_n
 	assign new_sdram_controller_0_s1_chipselect = 1'b1;             //                   .chipselect
 	assign new_sdram_controller_0_s1_writedata = sdram_writedata;              //                   .writedata
 	assign new_sdram_controller_0_s1_read_n = ~sdram_read;                 //                   .read_n
@@ -113,8 +122,8 @@ module AudioCore(
 
             to_state <= IDLE;
             sdram_address <= 0;
-            sdram_writedata <= 0;
             sdram_readdata <= 0;
+            bytecounter <= 0;
         end
         else begin
             state <= n_state;
@@ -132,8 +141,8 @@ module AudioCore(
             
             to_state <= n_to_state;
             sdram_address <= n_sdram_address;
-            sdram_writedata <= n_sdram_writedata;
             sdram_readdata <= n_sdram_readdata;
+            bytecounter <= n_bytecounter;
         end
     end
 
@@ -158,10 +167,12 @@ module AudioCore(
 
         n_to_state = to_state;
         n_sdram_address = sdram_address;
-        n_sdram_writedata = sdram_writedata
+        sdram_byteenable = 4'b0;
+        sdram_writedata = 0;
         n_sdram_readdata = sdram_readdata;
         sdram_read = 0;
         sdram_write = 0;
+        n_bytecounter = bytecounter;
         case (state)
             IDLE: begin
                 n_to_dac_left_channel_valid = 0;
@@ -337,18 +348,34 @@ module AudioCore(
             end
             WRITE_WAIT: begin
                 sdram_write = 1;
-                // set n_sdram_writedata in prev state
+                if ( !bytecounter ) begin
+                    sdram_byteenable = 4'b1100;
+                    sdram_writedata = {SDRAM_DQ, 16'd0}; // modify SDRAM_DQ
+                end else begin
+                    sdram_byteenable = 4'b0011;
+                    sdram_writedata = {16'd0, SDRAM_DQ}; // modify SDRAM_DQ
+                end
+                // set SRAM_DQ and bytecounter prev state
                 if ( !sdram_waitrequest ) begin
-                    n_sdram_address = sdram_address + 1;
+                    if ( bytecounter ) begin
+                        n_sdram_address = sdram_address + 1;
                     n_state = n_to_state;
                 end
             end
             READ_WAIT: begin
                 sdram_read = 1;
-                n_sdram_readdata = new_sdram_controller_0_s1_readdata;
+                if ( !bytecounter ) begin
+                    sdram_byteenable = 4'b1100;
+                    n_SRAM_DQ = new_sdram_controller_0_s1_readdata[31:16];
+                end else begin
+                    sdram_byteenable = 4'b0011;
+                    n_SRAM_DQ = new_sdram_controller_0_s1_readdata[15:0];
+                end
+                // set bytecounter in prev state and use SRAM_DQ in to_state
                 if ( !sdram_waitrequest && sdram_readdatavalid) begin
-                    n_sdram_address = sdram_address + 1;
-                    n_state = to_state;
+                    if ( bytecounter ) begin
+                        n_sdram_address = sdram_address + 1;
+                    n_state = n_to_state;
                 end
             end
         endcase
